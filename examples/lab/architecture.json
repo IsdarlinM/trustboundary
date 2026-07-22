@@ -1,0 +1,67 @@
+{
+  "nodes": [
+    {
+      "node_id": "internet",
+      "name": "Internet",
+      "node_type": "ZONE",
+      "public_reachable": true,
+      "metadata": {}
+    },
+    {
+      "node_id": "gateway",
+      "name": "API Gateway",
+      "node_type": "GATEWAY",
+      "public_reachable": true,
+      "metadata": {}
+    },
+    {
+      "node_id": "backend",
+      "name": "Backend",
+      "node_type": "SERVICE",
+      "public_reachable": false,
+      "metadata": {}
+    }
+  ],
+  "transitions": [
+    {
+      "transition_id": "t1",
+      "source_node_id": "internet",
+      "target_node_id": "gateway",
+      "data_type": "JWT",
+      "input_name": "Authorization",
+      "output_name": "X-User-ID",
+      "transformation": "JWT subject mapped to identity header",
+      "verified": true,
+      "evidence_ids": [
+        "EVD-T1"
+      ],
+      "metadata": {}
+    },
+    {
+      "transition_id": "t2",
+      "source_node_id": "gateway",
+      "target_node_id": "backend",
+      "data_type": "header",
+      "input_name": "X-User-ID",
+      "output_name": "X-User-ID",
+      "transformation": "forwarded unchanged",
+      "verified": null,
+      "evidence_ids": [
+        "EVD-T2"
+      ],
+      "metadata": {}
+    }
+  ],
+  "assertions": [
+    {
+      "assertion_id": "a1",
+      "node_id": "backend",
+      "statement": "Backend expects X-User-ID to originate from the gateway.",
+      "basis": "synthetic architecture declaration",
+      "evidence_ids": [
+        "EVD-A1"
+      ],
+      "metadata": {}
+    }
+  ]
+}
