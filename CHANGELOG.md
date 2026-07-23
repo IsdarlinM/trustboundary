@@ -1,12 +1,7 @@
 # Changelog
 
-## 0.2.0 - 2026-07-21
-- Added proxy/gateway chain reconstruction, identity transformation graph, trust-path mutation diff, JWT metadata sanitation and header provenance.
-- Added contradiction detection and direct-origin path comparison without automatic impersonation or bypass testing.
-- Added declarative Kubernetes/Istio/Envoy configuration import and a strict auditable Trust Assertion DSL.
-- Integrated SRIC 0.3 temporal graph, jobs/SSE, evidence lineage, notebook/query APIs and shared Evidence Store.
-
-## 0.1.0 - 2026-07-21
-
-- Initial evidence-native TrustBoundary Mapper implementation.
-- CLI, local API/UI, deterministic local storage, demo, tests, security controls and SRIC integration.
+## 0.3.0 - 2026-07-22
+- Added architecture reconstruction v2 with evidence/status/confidence per inferred trust edge.
+- Added identity provenance, mTLS/SPIFFE metadata modeling without private-key storage, cloud import-only adapters and trust assertion library.
+- Expanded trust mutation comparison and conservative assertion evaluation.
+- Upgraded to shared SRIC 0.4 workspace namespaces and graph/jobs/lineage primitives.
