@@ -13,23 +13,21 @@ from .layers import (
     compare_trust_layers,
 )
 from .provenance import IdentityProvenanceStep, analyze_identity_provenance
+from .websocket import WebSocketTrustObservation, analyze_websocket_trust_paths
 
 
 class TrustLayerRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     observations: list[TrustLayerObservation]
 
 
 class HeaderRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     headers: list[tuple[str, str]]
 
 
 class ArchitectureImportRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     provider: ArchitectureProvider
     source_id: str
     data: dict[str, Any]
@@ -38,8 +36,12 @@ class ArchitectureImportRequest(BaseModel):
 
 class ProvenanceRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     steps: list[IdentityProvenanceStep]
+
+
+class WebSocketTrustRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    observations: list[WebSocketTrustObservation]
 
 
 router = APIRouter(prefix="/api/v1/analysis", tags=["analysis"])
@@ -65,9 +67,7 @@ async def header_analysis(request: HeaderRequest) -> dict[str, object]:
 
 
 @router.post("/architecture/import")
-async def architecture_import(
-    request: ArchitectureImportRequest,
-) -> dict[str, object]:
+async def architecture_import(request: ArchitectureImportRequest) -> dict[str, object]:
     report = normalize_architecture_export(
         provider=request.provider,
         source_id=request.source_id,
@@ -88,6 +88,16 @@ async def provenance_analysis(request: ProvenanceRequest) -> dict[str, object]:
         "reports": [item.model_dump(mode="json") for item in reports],
         "authorization_correctness_proved": False,
         "exploitability_established": False,
+    }
+
+
+@router.post("/websocket/trust-paths")
+async def websocket_trust_paths(request: WebSocketTrustRequest) -> dict[str, object]:
+    reports = analyze_websocket_trust_paths(request.observations)
+    return {
+        "reports": [item.model_dump(mode="json") for item in reports],
+        "exploitability_established": False,
+        "validated_findings_created": 0,
     }
 
 
