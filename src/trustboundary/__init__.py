@@ -22,6 +22,12 @@ from .provenance import (
     ProvenanceStepType,
     analyze_identity_provenance,
 )
+from .websocket import (
+    WebSocketTrustObservation,
+    WebSocketTrustPath,
+    WebSocketTrustStage,
+    analyze_websocket_trust_paths,
+)
 
 __all__ = [
     "ArchitectureImportReport",
@@ -36,8 +42,12 @@ __all__ = [
     "TrustDrift",
     "TrustLayerComparison",
     "TrustLayerObservation",
+    "WebSocketTrustObservation",
+    "WebSocketTrustPath",
+    "WebSocketTrustStage",
     "analyze_forwarding_headers",
     "analyze_identity_provenance",
+    "analyze_websocket_trust_paths",
     "compare_trust_layers",
     "normalize_architecture_export",
 ]
