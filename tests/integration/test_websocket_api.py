@@ -1,6 +1,12 @@
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 
 from trustboundary.api_vnext import create_app
+
+
+def client(tmp_path: Path) -> TestClient:
+    return TestClient(create_app(tmp_path))
 
 
 def _base_path_observations() -> list[dict[str, object]]:
@@ -44,8 +50,7 @@ def _base_path_observations() -> list[dict[str, object]]:
     ]
 
 
-def test_websocket_post_revocation_message_is_hypothesis_only_with_control() -> None:
-    client = TestClient(create_app())
+def test_websocket_post_revocation_message_is_hypothesis_only_with_control(tmp_path: Path) -> None:
     observations = _base_path_observations()
     observations.extend(
         [
@@ -86,7 +91,7 @@ def test_websocket_post_revocation_message_is_hypothesis_only_with_control() -> 
             },
         ]
     )
-    response = client.post(
+    response = client(tmp_path).post(
         "/api/v1/analysis/websocket/trust-paths",
         json={"observations": observations},
     )
@@ -99,8 +104,7 @@ def test_websocket_post_revocation_message_is_hypothesis_only_with_control() -> 
     assert payload["validated_findings_created"] == 0
 
 
-def test_post_revocation_message_without_precontrol_remains_unknown() -> None:
-    client = TestClient(create_app())
+def test_post_revocation_message_without_precontrol_remains_unknown(tmp_path: Path) -> None:
     observations = _base_path_observations()
     observations.extend(
         [
@@ -123,7 +127,7 @@ def test_post_revocation_message_without_precontrol_remains_unknown() -> None:
             },
         ]
     )
-    response = client.post(
+    response = client(tmp_path).post(
         "/api/v1/analysis/websocket/trust-paths",
         json={"observations": observations},
     )
@@ -133,9 +137,8 @@ def test_post_revocation_message_without_precontrol_remains_unknown() -> None:
     assert "pre-revocation message control" in payload["reports"][0]["missing_stages"]
 
 
-def test_incomplete_websocket_path_remains_unknown() -> None:
-    client = TestClient(create_app())
-    response = client.post(
+def test_incomplete_websocket_path_remains_unknown(tmp_path: Path) -> None:
+    response = client(tmp_path).post(
         "/api/v1/analysis/websocket/trust-paths",
         json={
             "observations": [
@@ -156,9 +159,8 @@ def test_incomplete_websocket_path_remains_unknown() -> None:
     assert "authentication observation" in payload["reports"][0]["missing_stages"]
 
 
-def test_websocket_api_rejects_missing_evidence_without_server_error() -> None:
-    client = TestClient(create_app())
-    response = client.post(
+def test_websocket_api_rejects_missing_evidence_without_server_error(tmp_path: Path) -> None:
+    response = client(tmp_path).post(
         "/api/v1/analysis/websocket/trust-paths",
         json={
             "observations": [
@@ -173,3 +175,10 @@ def test_websocket_api_rejects_missing_evidence_without_server_error() -> None:
         },
     )
     assert response.status_code == 422
+
+
+def test_vnext_web_root_and_security_headers_share_same_app(tmp_path: Path) -> None:
+    response = client(tmp_path).get("/")
+    assert response.status_code == 200
+    assert "TrustBoundary Mapper" in response.text
+    assert "default-src 'self'" in response.headers["content-security-policy"]
