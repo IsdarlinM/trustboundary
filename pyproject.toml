@@ -30,7 +30,7 @@ dev=[
 ]
 
 [project.scripts]
-trustboundary="trustboundary.cli_vnext:run"
+trustboundary="trustboundary.cli_all:run"
 
 [tool.setuptools.packages.find]
 where=["src"]
