@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, FastAPI
@@ -7,11 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .adapters import ArchitectureProvider, normalize_architecture_export
 from .api import create_app as create_base_app
-from .layers import (
-    TrustLayerObservation,
-    analyze_forwarding_headers,
-    compare_trust_layers,
-)
+from .layers import TrustLayerObservation, analyze_forwarding_headers, compare_trust_layers
 from .provenance import IdentityProvenanceStep, analyze_identity_provenance
 from .websocket import WebSocketTrustObservation, analyze_websocket_trust_paths
 
@@ -60,10 +57,7 @@ async def layer_compare(request: TrustLayerRequest) -> dict[str, object]:
 @router.post("/headers/analyze")
 async def header_analysis(request: HeaderRequest) -> dict[str, object]:
     report = analyze_forwarding_headers(request.headers)
-    return {
-        "analysis": report.model_dump(mode="json"),
-        "trusted_identity_selected": False,
-    }
+    return {"analysis": report.model_dump(mode="json"), "trusted_identity_selected": False}
 
 
 @router.post("/architecture/import")
@@ -74,11 +68,7 @@ async def architecture_import(request: ArchitectureImportRequest) -> dict[str, o
         data=request.data,
         evidence_ids=request.evidence_ids,
     )
-    return {
-        "report": report.model_dump(mode="json"),
-        "executed": False,
-        "runtime_behavior_proved": False,
-    }
+    return {"report": report.model_dump(mode="json"), "executed": False, "runtime_behavior_proved": False}
 
 
 @router.post("/provenance/analyze")
@@ -101,7 +91,7 @@ async def websocket_trust_paths(request: WebSocketTrustRequest) -> dict[str, obj
     }
 
 
-def create_app() -> FastAPI:
-    app = create_base_app()
+def create_app(workspace: Path) -> FastAPI:
+    app = create_base_app(workspace)
     app.include_router(router)
     return app
