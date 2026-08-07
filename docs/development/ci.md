@@ -1,7 +1,13 @@
-# CI and private SRIC dependency
+# Local release validation
 
-All workflows run with `contents: read`, pinned GitHub Action commit SHAs, `persist-credentials: false`, tests, static checks, a local high-confidence security scan, SBOM generation, package build, Bandit SAST and pip-audit dependency scanning.
+TrustBoundary Mapper does not depend on GitHub Actions or another hosted CI service.
 
-For repositories that depend on the private `sric-core` repository, configure a repository secret named `SRIC_READ_TOKEN` containing a fine-grained GitHub token with **read-only Contents access to `sric-core` only**. Do not grant write, Actions, administration, or organization-wide permissions. Rotate the token and prefer an organization/repository-scoped GitHub App when the repositories become public or organizational governance is introduced.
+```bash
+python -m pip install -e ../sric-core
+python -m pip install -e '.[dev]'
+python scripts/release-gate.py
+```
 
-CI never receives production secrets, target credentials, capsules, or workspace data.
+The complete local gate runs compilation, Ruff, strict mypy, all pytest suites, project security/evaluation scripts when present, dependency audit, SBOM generation when available, package build, isolated wheel installation and root CLI help checks. Evidence and SHA-256 artifact hashes are written under `build/release-evidence/`.
+
+`--quick` is development-only. A release requires a complete `PASS` report for the exact source commit.
