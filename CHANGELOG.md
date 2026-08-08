@@ -4,8 +4,11 @@
 - Added declarative trust invariants for verified identity, client-header stripping, required transformations and provenance preservation.
 - Added evidence-linked invariant results with explicit `OBSERVED`, `HYPOTHESIS` or `UNKNOWN` outcomes; automated invariant evaluation cannot create `VALIDATED` results.
 - Added conservative counter-evidence and missing-evidence reporting for unverified identity and header-sanitization assumptions.
-- Added regression tests for verified/unverified identity flows and client-supplied identity header preservation.
 - Updated SRIC compatibility to the Sentinel Forge 0.5 release train.
+- Added standalone capability discovery with no mandatory sibling-product dependencies.
+- Reworked Linux/Windows installation to resolve SRIC 0.5 automatically and removed adjacent-repository auto-discovery.
+- Added standalone CLI/API/Web contracts, recursive help/parser tests, clean-install smokes and data-preserving Linux uninstall behavior.
+- Added regression tests for verified/unverified identity flows and client-supplied identity header preservation.
 
 ## 0.3.1 - 2026-08-06
 - Added explicit `DECLARED`, `CONFIGURED` and `OBSERVED` architecture/trust layers.
