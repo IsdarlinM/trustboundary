@@ -6,9 +6,11 @@ from trustboundary.cli_all import BRAND, app
 
 def test_trustboundary_brand_identity() -> None:
     banner = build_banner(BRAND)
-    assert "TrustBoundary Mapper" in banner
-    assert "identity flows" in banner
-    assert "IsdarlinM :: v0.5.2" in banner
+    product = banner.index("TrustBoundary Mapper :: v0.5.2")
+    developer = banner.index("Developer: IsdarlinM")
+    description = banner.index("identity flows")
+    assert product < developer < description
+    assert "IsdarlinM ::" not in banner
 
 
 def test_no_color_option_is_registered() -> None:
