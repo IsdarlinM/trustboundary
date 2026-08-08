@@ -1,44 +1,31 @@
-# Test Evidence — TrustBoundary v0.3.1
+# Test Evidence — TrustBoundary v0.5.0 Release Candidate
 
-## QA pass — 2026-08-07
+## Release-candidate review — 2026-08-08
 
-Freshly executed in the current local runtime:
+The `agent/release-0.5.0` branch contains:
 
-- Sentinel Forge cross-product high-risk regression matrix including TrustBoundary WebSocket trust-path logic: **7/7 matrix tests passed**;
-- Python `compileall` over the reconstructed corrected modules: **PASS**;
-- branch comparison against `main`: branch is ahead and **0 commits behind** at the time of this audit.
+- SRIC 0.5 compatibility with no mandatory sibling-product dependency;
+- declarative trust invariants with `OBSERVED`, `HYPOTHESIS` or `UNKNOWN` outcomes;
+- evidence, counter-evidence and missing-evidence reporting;
+- `trustboundary capabilities` and `/api/v1/capabilities`;
+- standalone CLI/API/Web tests and recursive help/parser contracts;
+- Linux/Windows clean-install smoke definitions using only TrustBoundary + SRIC;
+- Linux uninstall that preserves workspaces/configuration/evidence;
+- standardized standalone and release-evidence gates.
 
-Current-source review and regression coverage include:
+## Fresh execution status
 
-- declared/configured/observed trust-layer separation;
-- duplicate/conflicting forwarding-header preservation;
-- architecture import as untrusted data with no execution;
-- identity provenance remaining `UNKNOWN` when incomplete;
-- evidence required for every WebSocket trust observation;
-- validator required for authentication transitions;
-- pre-revocation message control required before post-revocation can become `HYPOTHESIS`;
-- timezone-aware observations;
-- repaired executable Python integration test that previously contained JSON `true`;
-- WebSocket endpoint actually registered in vNext;
-- complete CLI entrypoint registration for `websocket-trust`;
-- recursive help-path coverage and controlled CLI errors;
-- `trustboundary web` serving the workspace-bound vNext API and CSP-protected UI;
-- public Python exports for WebSocket trust primitives.
+**THE COMPLETE v0.5.0 TEST/RELEASE GATES HAVE NOT EXECUTED SUCCESSFULLY FOR THIS BRANCH.**
 
-## Current release-gate status
+The repository cannot be mounted as a complete local checkout in this runtime. The latest observed GitHub Actions run concluded `startup_failure` and exposed zero jobs. No pytest, installer, static-analysis or wheel result from that run is counted as evidence.
 
-**FULL CURRENT REPOSITORY GATE NOT EXECUTABLE IN THIS RUNTIME.**
-
-The private repository cannot be materialized as a complete local checkout from the connector, and Ruff, mypy, `build` and `pip-audit` are unavailable from the runtime/index. No GitHub Actions, Codespaces or paid/hosted GitHub execution was used.
-
-Before treating v0.3.1 as a fully validated release, run the exact commit from a local sibling checkout:
+## Required exact-commit evidence
 
 ```bash
-python -m pip install -e ../sric-core
-python -m pip install -e '.[dev]'
-python scripts/release-gate.py
+python -m sric.standalone_gate --root trustboundary
+python sric-core/scripts/release-standalone-ecosystem.py --root .
+python trustboundary/scripts/release-gate.py
+python sric-core/scripts/release-ecosystem.py --root .
 ```
 
-## Previous validated baseline
-
-The previous v0.3.0 state was recorded on 2026-07-22 with **20 pytest tests passed**, compileall/security scan/CLI help/synthetic smoke/build/isolated wheel smoke PASS. Those results are a historical baseline only.
+All gate layers must report PASS before merge/tag. Previous 0.3.x evidence remains a historical baseline only.

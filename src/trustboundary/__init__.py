@@ -6,6 +6,12 @@ from .adapters import (
     ImportedComponent,
     normalize_architecture_export,
 )
+from .invariants import (
+    TrustInvariant,
+    TrustInvariantKind,
+    TrustInvariantResult,
+    evaluate_trust_invariant,
+)
 from .layers import (
     ArchitectureLayer,
     HeaderAnalysis,
@@ -40,6 +46,9 @@ __all__ = [
     "ImportedComponent",
     "ProvenanceStepType",
     "TrustDrift",
+    "TrustInvariant",
+    "TrustInvariantKind",
+    "TrustInvariantResult",
     "TrustLayerComparison",
     "TrustLayerObservation",
     "WebSocketTrustObservation",
@@ -49,6 +58,7 @@ __all__ = [
     "analyze_identity_provenance",
     "analyze_websocket_trust_paths",
     "compare_trust_layers",
+    "evaluate_trust_invariant",
     "normalize_architecture_export",
 ]
-__version__ = "0.3.1"
+__version__ = "0.5.0"
