@@ -2,7 +2,7 @@
 
 ```text
 TrustBoundary Mapper
-imr :: v0.5.0
+IsdarlinM :: v0.5.2
 ```
 
 Evidence-native identity, trust-transition and trust-assumption modeling.
@@ -28,7 +28,8 @@ trustboundary capabilities
 - declarative Kubernetes/Istio/Envoy and import-only cloud architecture adapters;
 - reusable trust assertions/invariants with conservative `UNKNOWN`, `INFERRED` and `HYPOTHESIS` semantics;
 - SRIC 0.5.x workspace, graph, jobs/SSE, evidence lineage, notebook/search and confidence primitives;
-- local API/Web UI, CLI and offline demo.
+- local API/Web UI, CLI and offline demo;
+- professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
 
 ## Evidence semantics
 
@@ -53,6 +54,10 @@ trustboundary capabilities
 ```
 
 The installer resolves SRIC automatically. `SRIC_CORE_SOURCE` is an explicit development/release-validation override only.
+
+## CLI presentation
+
+Interactive terminals display a compact subdued-green banner with a short trust/identity-flow description and `IsdarlinM :: v0.5.2`. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
 
 ## Quickstart
 
