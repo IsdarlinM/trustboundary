@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: IsdarlinM/sric-core
-          ref: agent/release-0.5.0
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
           path: sric-core
           token: ${{ secrets.SENTINEL_FORGE_CI_TOKEN }}
       - uses: actions/setup-python@v5
