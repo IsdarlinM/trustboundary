@@ -1,8 +1,10 @@
 # TrustBoundary Mapper
 
 ```text
-TrustBoundary Mapper
-IsdarlinM :: v0.5.2
+TrustBoundary Mapper :: v0.5.2
+Developer: IsdarlinM
+
+Map identity flows, trust transitions, assumptions, and evidence.
 ```
 
 Evidence-native identity, trust-transition and trust-assumption modeling.
@@ -57,7 +59,7 @@ The installer resolves SRIC automatically. `SRIC_CORE_SOURCE` is an explicit dev
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner with a short trust/identity-flow description and `IsdarlinM :: v0.5.2`. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
+Interactive terminals display a compact subdued-green banner ordered as `TrustBoundary Mapper :: v0.5.2`, `Developer: IsdarlinM`, then the trust/identity-flow purpose statement. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
 
 ## Quickstart
 
