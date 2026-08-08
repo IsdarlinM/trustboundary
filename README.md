@@ -2,12 +2,21 @@
 
 ```text
 TrustBoundary Mapper
-imr :: v0.3.1
+imr :: v0.5.0
 ```
 
 Evidence-native identity, trust-transition and trust-assumption modeling.
 
 > **AI proposes. Evidence proves. Humans control.**
+
+## Standalone by design
+
+TrustBoundary Mapper is independently installable and independently useful. It depends on SRIC Core 0.5.x for shared evidence, policy, workspaces and graph primitives; ReproSec, AuthTwin, FossilScope and Exposure DNA are optional integrations, never startup requirements.
+
+```bash
+trustboundary doctor --json
+trustboundary capabilities
+```
 
 ## Implemented
 
@@ -17,34 +26,64 @@ Evidence-native identity, trust-transition and trust-assumption modeling.
 - trust mutation diff, JWT/header provenance, contradiction and direct-origin path analysis;
 - mTLS/SPIFFE metadata modeling without storing private keys;
 - declarative Kubernetes/Istio/Envoy and import-only cloud architecture adapters;
-- reusable trust assertions with conservative `UNKNOWN`, `INFERRED` and `HYPOTHESIS` semantics;
-- shared SRIC 0.4.1 workspace, graph, jobs/SSE, evidence lineage, notebook/search and confidence calibration;
+- reusable trust assertions/invariants with conservative `UNKNOWN`, `INFERRED` and `HYPOTHESIS` semantics;
+- SRIC 0.5.x workspace, graph, jobs/SSE, evidence lineage, notebook/search and confidence primitives;
 - local API/Web UI, CLI and offline demo.
 
-## Architecture evidence layers in v0.3.1
+## Evidence semantics
 
-TrustBoundary now separates `DECLARED`, `CONFIGURED` and `OBSERVED` trust paths. Differences produce configuration, runtime or identity-transformation drift hypotheses. Missing or contradictory layers remain `UNKNOWN`. Agreement only describes the sampled path and does not prove every route or deployment behaves identically.
+TrustBoundary separates `DECLARED`, `CONFIGURED` and `OBSERVED` trust paths. Differences produce hypotheses, not exploitation claims. Missing or contradictory layers remain `UNKNOWN`. A violated trust invariant can become `HYPOTHESIS`; automated analysis cannot create `VALIDATED` exploitability.
 
-Forwarding headers are normalized case-insensitively while duplicate and conflicting values are preserved. The mapper does not silently decide precedence between `Forwarded` and `X-Forwarded-*`, infer a trusted proxy count or assume append/replace behavior. Header ambiguity is evidence requiring configuration or runtime confirmation, not proof of exploitation.
+## Standalone install
+
+Linux:
+
+```bash
+./scripts/install-linux.sh
+trustboundary doctor --json
+trustboundary capabilities
+```
+
+Windows:
+
+```cmd
+scripts\install-windows.cmd
+trustboundary doctor --json
+trustboundary capabilities
+```
+
+The installer resolves SRIC automatically. `SRIC_CORE_SOURCE` is an explicit development/release-validation override only.
 
 ## Quickstart
 
 ```bash
-trustboundary doctor
+trustboundary doctor --json
+trustboundary capabilities
 trustboundary demo --workspace demo
 trustboundary graph demo
 trustboundary assumptions demo
 trustboundary web demo
 ```
 
-## Local release gate
+## Web and API
+
+The responsive local Web UI presents trust graphs, identity/trust evidence and analysis surfaces. It is **not an arbitrary operating-system web shell**.
+
+## Validation gates
 
 ```bash
-python -m pip install -e ../sric-core
-python -m pip install -e '.[dev]'
+python -m sric.standalone_gate --root .
 python scripts/release-gate.py
 ```
 
-The complete machine-readable report is written to `build/release-evidence/release-gate.json`. A release requires `PASS` for the exact commit.
+Evidence is written below `build/release-evidence/`; PASS must correspond to the exact source commit.
 
-Inference never establishes exploitability. All imported content is untrusted data, and active actions remain behind SRIC Scope/Policy/Rate/Approval controls. Telemetry, cloud AI and external uploads are OFF by default. Apache-2.0.
+## Uninstall
+
+```bash
+./scripts/uninstall-linux.sh
+```
+
+The runtime and command shim are removed while workspaces, configuration and evidence under `~/.trustboundary/` are preserved.
+
+All imported content is untrusted data. Active actions remain behind SRIC Scope/Policy/Rate/Approval controls. Telemetry, cloud AI and external uploads are OFF by default. Apache-2.0.
