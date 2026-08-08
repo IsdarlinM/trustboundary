@@ -8,7 +8,9 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .adapters import ArchitectureProvider, normalize_architecture_export
 from .api import create_app as create_base_app
+from .invariants import TrustInvariant, evaluate_trust_invariant
 from .layers import TrustLayerObservation, analyze_forwarding_headers, compare_trust_layers
+from .models import Transition
 from .provenance import IdentityProvenanceStep, analyze_identity_provenance
 from .websocket import WebSocketTrustObservation, analyze_websocket_trust_paths
 
@@ -39,6 +41,12 @@ class ProvenanceRequest(BaseModel):
 class WebSocketTrustRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     observations: list[WebSocketTrustObservation]
+
+
+class TrustInvariantRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    invariant: TrustInvariant
+    transitions: list[Transition]
 
 
 router = APIRouter(prefix="/api/v1/analysis", tags=["analysis"])
@@ -86,6 +94,16 @@ async def websocket_trust_paths(request: WebSocketTrustRequest) -> dict[str, obj
     reports = analyze_websocket_trust_paths(request.observations)
     return {
         "reports": [item.model_dump(mode="json") for item in reports],
+        "exploitability_established": False,
+        "validated_findings_created": 0,
+    }
+
+
+@router.post("/invariants/evaluate")
+async def invariant_evaluate(request: TrustInvariantRequest) -> dict[str, object]:
+    result = evaluate_trust_invariant(request.invariant, request.transitions)
+    return {
+        "result": result.model_dump(mode="json"),
         "exploitability_established": False,
         "validated_findings_created": 0,
     }
