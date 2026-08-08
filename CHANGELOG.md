@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.1 - 2026-08-08
+- Fixed clean installation when `sric-core` is not published on PyPI.
+- Added a first-party dependency manifest pinned to the exact SRIC Core 0.5.1 GitHub commit.
+- Windows and Linux installers now bootstrap first-party dependencies before TrustBoundary and its third-party runtime dependencies.
+- Preserved `SRIC_CORE_SOURCE` as an explicit development override.
+- Updated the SRIC dependency floor/runtime lock to 0.5.1 and added installer contract regression coverage.
+
 ## 0.5.0 - 2026-08-08
 - Added declarative trust invariants for verified identity, client-header stripping, required transformations and provenance preservation.
 - Added evidence-linked invariant results with explicit `OBSERVED`, `HYPOTHESIS` or `UNKNOWN` outcomes; automated invariant evaluation cannot create `VALIDATED` results.
