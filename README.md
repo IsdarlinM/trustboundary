@@ -1,7 +1,7 @@
 # TrustBoundary Mapper
 
 ```text
-TrustBoundary Mapper :: v0.5.5
+TrustBoundary Mapper :: v0.5.6
 Developer: IsdarlinM
 
 Map identity flows, trust transitions, assumptions, and evidence.
@@ -32,7 +32,8 @@ trustboundary capabilities
 - SRIC 0.5.x workspace, graph, jobs/SSE, evidence lineage, notebook/search and confidence primitives;
 - local API/Web UI, CLI and offline demo;
 - zero-config official update flow with safe same-version `update --force` reinstall support;
-- Web Command Console with exact public CLI command-tree parity and real-time jobs;
+- full Web Feature Workbench with every public TrustBoundary CLI command and argument represented as structured responsive controls;
+- advanced Web Command Console with exact public CLI command-tree parity and real-time jobs;
 - professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
 
 ## Evidence semantics
@@ -61,7 +62,7 @@ The installer resolves SRIC automatically. `SRIC_CORE_SOURCE` is an explicit dev
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `TrustBoundary Mapper :: v0.5.5`, `Developer: IsdarlinM`, then the trust/identity-flow purpose statement. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
+Interactive terminals display a compact subdued-green banner ordered as `TrustBoundary Mapper :: v0.5.6`, `Developer: IsdarlinM`, then the trust/identity-flow purpose statement. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation.
 
 ## Quickstart
 
@@ -76,13 +77,11 @@ trustboundary web demo
 
 ## Web and API
 
-The responsive local Web UI presents trust graphs, identity/trust evidence and analysis surfaces. `/console` adds the Web Command Console, whose catalog is generated from `trustboundary.cli_all`; a standalone test requires the Web and CLI command-path sets to be exactly equal.
+The native dashboard remains a quick trust-graph view and now exposes visible navigation to **All Features** (`/workbench`) and **Advanced Console** (`/console`). The Workbench is generated from `trustboundary.cli_all` and represents every public command and every ordered CLI parameter as structured responsive controls.
 
-The console is **not an arbitrary operating-system web shell**. It invokes only the fixed SRIC runner with `shell=False`, disabled stdin and a structured argv array. Mutating commands require explicit approval; Scope/Policy and evidence semantics remain authoritative. See `docs/web/cli-parity.md`.
+The Workbench is not an operating-system shell. Execution uses the fixed SRIC runner with `shell=False`, disabled stdin, CSRF protection, secret redaction, bounded/cancellable jobs and SSE output. Scope/Policy/Rate/Approval and evidence semantics remain authoritative; no Web action can turn an inference into `VALIDATED` exploitability without evidence.
 
 ## Updates
-
-The official update path is zero-config:
 
 ```bash
 trustboundary update --check
@@ -90,11 +89,7 @@ trustboundary update
 trustboundary update --force
 ```
 
-Normal users do **not** provide a manifest or public key. SRIC resolves only the fixed official `IsdarlinM/trustboundary` channel, requires the selected immutable release commit to be reported by GitHub as signature-verified, validates the exact source snapshot and package metadata, backs up state, installs without a shell, and verifies the installed distribution version.
-
-`--force` reinstalls the official release even when that exact version is already installed. It may install a newer official release but never downgrades; `--check` and `--force` cannot be combined. Normal upgrades require rollback metadata; same-version forced reinstalls use the verified target snapshot as the recovery package.
-
-`--manifest` and `--public-key` remain available together only as an advanced custom/private-channel override. Custom channels retain Ed25519 manifest and SHA-256 wheel verification. No blind `git pull` fallback is used. See `docs/release/update.md`.
+The official path is zero-config. `--force` may reinstall the current official version or move forward, never downgrade. Custom `--manifest` plus `--public-key` remains an advanced signed-channel override.
 
 ## Validation gates
 
@@ -102,6 +97,8 @@ Normal users do **not** provide a manifest or public key. SRIC resolves only the
 python -m sric.standalone_gate --root .
 python scripts/release-gate.py
 ```
+
+The 0.5.6 interface suite walks every public command with `--help`, verifies all options/required arguments, compares the complete ordered CLI parameter tree with the Workbench catalog, and smoke-tests native trust graph, assumptions, proxy-chain, transformation, contradiction and origin-path APIs. Destructive operations are gate-tested rather than executed solely for coverage.
 
 Evidence is written below `build/release-evidence/`; PASS must correspond to the exact source commit.
 
