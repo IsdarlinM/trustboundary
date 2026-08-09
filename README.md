@@ -1,7 +1,7 @@
 # TrustBoundary Mapper
 
 ```text
-TrustBoundary Mapper :: v0.5.7
+TrustBoundary Mapper :: v0.5.8
 Developer: IsdarlinM
 
 Map identity flows, trust transitions, assumptions, and evidence.
@@ -44,7 +44,7 @@ TrustBoundary separates `DECLARED`, `CONFIGURED` and `OBSERVED` trust paths. Dif
 
 ## Standalone install and repair
 
-Linux:
+Linux / Termux:
 
 ```bash
 ./scripts/install-linux.sh
@@ -60,11 +60,13 @@ trustboundary doctor --json
 trustboundary capabilities
 ```
 
-The installer resolves SRIC automatically. `SRIC_CORE_SOURCE` is an explicit development/release-validation override only. Installers are repair-capable: they force-reinstall the pinned signed first-party runtime and TrustBoundary, run `pip check`, import-probe `sric.web_console`/`sric.web_workbench`, validate the SRIC range, and run doctor/capability/help smokes while preserving workspaces and evidence.
+The normal installer pins SRIC Core to an immutable GitHub commit and resolves that explicit first-party source **in the same pip transaction as TrustBoundary**. Because `sric-core` is intentionally not discovered from PyPI, the installer no longer runs a later product-only `--force-reinstall` that can trigger `ResolutionImpossible`. `SRIC_CORE_SOURCE=/path/to/sric-core` remains an explicit development/release-validation override.
+
+The repair path preserves workspaces and evidence. It bootstraps `pip`, `setuptools` and `wheel`, force-reinstalls constrained TrustBoundary plus the explicit SRIC source, runs `pip check`, verifies `sric.web_console` and `sric.web_workbench`, checks the supported SRIC version range, and runs doctor/capability plus `--help`, `-h` and `help` smokes. Linux persists a valid `$HOME/.local/bin` PATH entry without literal quote characters; Windows accepts any Python 3 interpreter that satisfies `>=3.11`.
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `TrustBoundary Mapper :: v0.5.7`, `Developer: IsdarlinM`, then the trust/identity-flow purpose statement. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation.
+Interactive terminals display a compact subdued-green banner ordered as `TrustBoundary Mapper :: v0.5.8`, `Developer: IsdarlinM`, then the trust/identity-flow purpose statement. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation.
 
 The help contract covers `trustboundary --help`, `trustboundary -h`, `trustboundary help`, `trustboundary COMMAND --help`, `trustboundary COMMAND -h` and `trustboundary COMMAND help`.
 
@@ -106,7 +108,7 @@ python -m sric.standalone_gate --root .
 python scripts/release-gate.py
 ```
 
-The 0.5.7 runtime/interface suite reproduces stale/missing Workbench states, validates the signed transition chain and same-version repair, verifies degraded Web behavior, walks every public command through all supported help forms and compares every ordered CLI parameter with the Workbench schema. Existing unit/integration/E2E/security suites continue to cover trust graphs, assumptions, proxy chains, identity transformations/provenance, contradictions, direct-origin paths, headers, mTLS/SPIFFE, imports and conservative invariant semantics. Destructive operations are gate-tested rather than executed solely for coverage.
+The 0.5.8 installer regression verifies the unpublished-first-party resolver topology, immutable SRIC pin, runtime lock, Linux PATH quoting, Windows Python discovery and dependency/import/help smokes. Existing runtime/interface and unit/integration/E2E/security suites continue to cover trust graphs, assumptions, proxy chains, identity transformations/provenance, contradictions, direct-origin paths, headers, mTLS/SPIFFE, imports and conservative invariant semantics. Destructive operations are gate-tested rather than executed solely for coverage.
 
 Evidence is written below `build/release-evidence/`; PASS must correspond to the exact source commit.
 
