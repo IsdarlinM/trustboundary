@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.5 - 2026-08-08
+- Made the official TrustBoundary updater zero-config: `trustboundary update`, `trustboundary update --check`, and `trustboundary update --force` no longer require user-supplied manifest/key configuration.
+- Delegated official update trust and immutable GitHub signed-commit validation to SRIC Core 0.5.5 while preserving same-version force reinstall and downgrade rejection.
+- Kept `--manifest` plus `--public-key` as an explicit advanced custom/private-channel override.
+- Updated the SRIC Core runtime floor, lock, and exact first-party pin to the signed SRIC 0.5.5 release commit.
+- Added standalone regression coverage proving `trustboundary update --force` selects the official channel with no manifest/key.
+
 ## 0.5.4 - 2026-08-08
 - Added the SRIC Web Command Console at `/console`, exposing the complete installed `trustboundary.cli_all` command tree without an operating-system shell.
 - Added exact Web-catalog-to-CLI-tree regression coverage so future public CLI commands cannot silently disappear from the Web console.
