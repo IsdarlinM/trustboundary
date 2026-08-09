@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.7 - 2026-08-09
+- Fixed first-party runtime drift that could install a newer TrustBoundary beside an older SRIC and fail on shared Web-module imports before command dispatch.
+- Added exact SRIC distribution/module diagnostics, lazy shared-Web imports, `/api/v1/runtime-compatibility`, and actionable degraded Workbench 503 responses.
+- Official updates repair supported stale/corrupt SRIC 0.5.x runtimes through immutable GitHub-signature-verified transition snapshots before updating TrustBoundary.
+- Linux/Windows installers now force-reinstall pinned first-party dependencies and TrustBoundary, run `pip check`, import-probe Web Console/Workbench and execute doctor/capability/help smokes.
+- Added regressions for stale/missing Workbench runtimes, signed transition chain, same-version repair, every public CLI help form and exact ordered CLI/Web parameter parity while preserving evidence/provenance semantics.
+- New installs pin signed SRIC Core 0.5.8.
+
 ## 0.5.6 - 2026-08-09
 - Added the full Web Feature Workbench at `/workbench`, generated from `trustboundary.cli_all`, with structured responsive controls for every public CLI command and argument.
 - Added visible Dashboard / All Features / Advanced Console navigation to the native trust-graph Web surface.
