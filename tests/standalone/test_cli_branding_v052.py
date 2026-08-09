@@ -6,7 +6,7 @@ from trustboundary.cli_all import BRAND, app
 
 def test_trustboundary_brand_identity() -> None:
     banner = build_banner(BRAND)
-    product = banner.index("TrustBoundary Mapper :: v0.5.2")
+    product = banner.index("TrustBoundary Mapper :: v0.5.3")
     developer = banner.index("Developer: IsdarlinM")
     description = banner.index("identity flows")
     assert product < developer < description
