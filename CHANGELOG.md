@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.6 - 2026-08-09
+- Added the full Web Feature Workbench at `/workbench`, generated from `trustboundary.cli_all`, with structured responsive controls for every public CLI command and argument.
+- Added visible Dashboard / All Features / Advanced Console navigation to the native trust-graph Web surface.
+- Preserved evidence/provenance semantics and Scope/Policy/Rate/Approval controls; Web execution cannot promote an inference or hypothesis to `VALIDATED` exploitability.
+- Updated SRIC Core floor, runtime lock and exact first-party pin to the signed SRIC 0.5.6 Workbench release.
+- Added exhaustive CLI help/argument-to-Web parity tests and native trust-surface API smoke coverage.
+
 ## 0.5.5 - 2026-08-08
 - Made the official TrustBoundary updater zero-config: `trustboundary update`, `trustboundary update --check`, and `trustboundary update --force` no longer require user-supplied manifest/key configuration.
 - Delegated official update trust and immutable GitHub signed-commit validation to SRIC Core 0.5.5 while preserving same-version force reinstall and downgrade rejection.
