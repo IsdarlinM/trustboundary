@@ -1,7 +1,7 @@
 # TrustBoundary Mapper
 
 ```text
-TrustBoundary Mapper :: v0.5.2
+TrustBoundary Mapper :: v0.5.3
 Developer: IsdarlinM
 
 Map identity flows, trust transitions, assumptions, and evidence.
@@ -31,6 +31,7 @@ trustboundary capabilities
 - reusable trust assertions/invariants with conservative `UNKNOWN`, `INFERRED` and `HYPOTHESIS` semantics;
 - SRIC 0.5.x workspace, graph, jobs/SSE, evidence lineage, notebook/search and confidence primitives;
 - local API/Web UI, CLI and offline demo;
+- signed update flow with safe same-version `update --force` reinstall support;
 - professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
 
 ## Evidence semantics
@@ -59,7 +60,7 @@ The installer resolves SRIC automatically. `SRIC_CORE_SOURCE` is an explicit dev
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `TrustBoundary Mapper :: v0.5.2`, `Developer: IsdarlinM`, then the trust/identity-flow purpose statement. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
+Interactive terminals display a compact subdued-green banner ordered as `TrustBoundary Mapper :: v0.5.3`, `Developer: IsdarlinM`, then the trust/identity-flow purpose statement. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
 
 ## Quickstart
 
@@ -75,6 +76,18 @@ trustboundary web demo
 ## Web and API
 
 The responsive local Web UI presents trust graphs, identity/trust evidence and analysis surfaces. It is **not an arbitrary operating-system web shell**.
+
+## Signed updates
+
+The updater accepts only an Ed25519-signed manifest and a SHA-256 verified wheel. Configure `TRUSTBOUNDARY_RELEASE_MANIFEST_URL` plus `TRUSTBOUNDARY_RELEASE_PUBLIC_KEY`, or pass `--manifest` and `--public-key`.
+
+```bash
+trustboundary update --check
+trustboundary update
+trustboundary update --force
+```
+
+`--force` reinstalls the selected signed release even when that exact version is already installed. It may install a newer signed version but never downgrades; `--check` and `--force` cannot be combined. No unsigned or blind `git pull` fallback is used. Until the official signed release channel is published, release-channel configuration remains explicit.
 
 ## Validation gates
 
