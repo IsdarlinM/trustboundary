@@ -1,12 +1,13 @@
 from typer.main import get_command
 
 from sric.cli_style import build_banner
+from trustboundary import __version__
 from trustboundary.cli_all import BRAND, app
 
 
 def test_trustboundary_brand_identity() -> None:
     banner = build_banner(BRAND)
-    product = banner.index("TrustBoundary Mapper :: v0.5.3")
+    product = banner.index(f"TrustBoundary Mapper :: v{__version__}")
     developer = banner.index("Developer: IsdarlinM")
     description = banner.index("identity flows")
     assert product < developer < description

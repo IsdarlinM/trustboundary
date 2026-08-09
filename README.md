@@ -1,7 +1,7 @@
 # TrustBoundary Mapper
 
 ```text
-TrustBoundary Mapper :: v0.5.3
+TrustBoundary Mapper :: v0.5.4
 Developer: IsdarlinM
 
 Map identity flows, trust transitions, assumptions, and evidence.
@@ -32,6 +32,7 @@ trustboundary capabilities
 - SRIC 0.5.x workspace, graph, jobs/SSE, evidence lineage, notebook/search and confidence primitives;
 - local API/Web UI, CLI and offline demo;
 - signed update flow with safe same-version `update --force` reinstall support;
+- Web Command Console with exact public CLI command-tree parity and real-time jobs;
 - professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
 
 ## Evidence semantics
@@ -60,7 +61,7 @@ The installer resolves SRIC automatically. `SRIC_CORE_SOURCE` is an explicit dev
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `TrustBoundary Mapper :: v0.5.3`, `Developer: IsdarlinM`, then the trust/identity-flow purpose statement. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
+Interactive terminals display a compact subdued-green banner ordered as `TrustBoundary Mapper :: v0.5.4`, `Developer: IsdarlinM`, then the trust/identity-flow purpose statement. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
 
 ## Quickstart
 
@@ -75,7 +76,9 @@ trustboundary web demo
 
 ## Web and API
 
-The responsive local Web UI presents trust graphs, identity/trust evidence and analysis surfaces. It is **not an arbitrary operating-system web shell**.
+The responsive local Web UI presents trust graphs, identity/trust evidence and analysis surfaces. `/console` adds the Web Command Console, whose catalog is generated from `trustboundary.cli_all`; a standalone test requires the Web and CLI command-path sets to be exactly equal.
+
+The console is **not an arbitrary operating-system web shell**. It invokes only the fixed SRIC runner with `shell=False`, disabled stdin and a structured argv array. Mutating commands require explicit approval; Scope/Policy and evidence semantics remain authoritative. See `docs/web/cli-parity.md`.
 
 ## Signed updates
 
