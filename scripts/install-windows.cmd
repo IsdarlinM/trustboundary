@@ -43,10 +43,14 @@ if defined SRIC_CORE_SOURCE (
 "%VENV%\Scripts\python.exe" -c "import importlib.metadata as m; import sric.web_console, sric.web_workbench; v=tuple(int(x) for x in m.version('sric-core').split('.')[:3]); raise SystemExit(0 if (0,5,7)<=v<(0,6,0) else 1)" || (echo SRIC Core runtime integrity check failed. Required ^>=0.5.7,^<0.6.& exit /b 3)
 >"%BIN_DIR%\%CMD%.cmd" echo @"%VENV%\Scripts\%CMD%.exe" %%*
 "%VENV%\Scripts\python.exe" -m sric.install_path "%BIN_DIR%" || exit /b 3
+
+rem Render the product banner once with doctor; suppress internal smoke tests.
 "%VENV%\Scripts\%CMD%.exe" doctor --json || exit /b 1
+set "SENTINEL_BANNER=off"
 "%VENV%\Scripts\%CMD%.exe" capabilities || exit /b 1
 "%VENV%\Scripts\%CMD%.exe" --help >nul || exit /b 1
 "%VENV%\Scripts\%CMD%.exe" -h >nul || exit /b 1
 "%VENV%\Scripts\%CMD%.exe" help >nul || exit /b 1
+set "SENTINEL_BANNER="
 echo %PROJECT% installed/repaired successfully in standalone mode.
 exit /b 0
