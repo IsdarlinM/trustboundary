@@ -61,4 +61,4 @@ __all__ = [
     "evaluate_trust_invariant",
     "normalize_architecture_export",
 ]
-__version__ = "0.5.5"
+__version__ = "0.5.6"
