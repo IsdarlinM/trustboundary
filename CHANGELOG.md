@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.4 - 2026-08-08
+- Added the SRIC Web Command Console at `/console`, exposing the complete installed `trustboundary.cli_all` command tree without an operating-system shell.
+- Added exact Web-catalog-to-CLI-tree regression coverage so future public CLI commands cannot silently disappear from the Web console.
+- Preserved TrustBoundary evidence/provenance semantics and Scope/Policy controls; Web invocation cannot promote a hypothesis to a validated finding.
+- Added fixed-runner `shell=False` execution, explicit mutation approval, secret redaction, cancellable jobs and real-time SSE output through SRIC Core 0.5.4.
+- Updated package/runtime dependency metadata and the exact SRIC first-party pin to the 0.5.4 Web parity snapshot.
+
 ## 0.5.3 - 2026-08-08
 - Added `trustboundary update --force` for explicit same-version reinstall of a trusted signed release using pip `--force-reinstall`.
 - Preserved Ed25519 manifest verification, SHA-256 wheel verification, state backup and rollback behavior.
