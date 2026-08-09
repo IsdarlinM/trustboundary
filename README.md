@@ -1,7 +1,7 @@
 # TrustBoundary Mapper
 
 ```text
-TrustBoundary Mapper :: v0.5.4
+TrustBoundary Mapper :: v0.5.5
 Developer: IsdarlinM
 
 Map identity flows, trust transitions, assumptions, and evidence.
@@ -31,7 +31,7 @@ trustboundary capabilities
 - reusable trust assertions/invariants with conservative `UNKNOWN`, `INFERRED` and `HYPOTHESIS` semantics;
 - SRIC 0.5.x workspace, graph, jobs/SSE, evidence lineage, notebook/search and confidence primitives;
 - local API/Web UI, CLI and offline demo;
-- signed update flow with safe same-version `update --force` reinstall support;
+- zero-config official update flow with safe same-version `update --force` reinstall support;
 - Web Command Console with exact public CLI command-tree parity and real-time jobs;
 - professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
 
@@ -61,7 +61,7 @@ The installer resolves SRIC automatically. `SRIC_CORE_SOURCE` is an explicit dev
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `TrustBoundary Mapper :: v0.5.4`, `Developer: IsdarlinM`, then the trust/identity-flow purpose statement. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
+Interactive terminals display a compact subdued-green banner ordered as `TrustBoundary Mapper :: v0.5.5`, `Developer: IsdarlinM`, then the trust/identity-flow purpose statement. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
 
 ## Quickstart
 
@@ -80,9 +80,9 @@ The responsive local Web UI presents trust graphs, identity/trust evidence and a
 
 The console is **not an arbitrary operating-system web shell**. It invokes only the fixed SRIC runner with `shell=False`, disabled stdin and a structured argv array. Mutating commands require explicit approval; Scope/Policy and evidence semantics remain authoritative. See `docs/web/cli-parity.md`.
 
-## Signed updates
+## Updates
 
-The updater accepts only an Ed25519-signed manifest and a SHA-256 verified wheel. Configure `TRUSTBOUNDARY_RELEASE_MANIFEST_URL` plus `TRUSTBOUNDARY_RELEASE_PUBLIC_KEY`, or pass `--manifest` and `--public-key`.
+The official update path is zero-config:
 
 ```bash
 trustboundary update --check
@@ -90,7 +90,11 @@ trustboundary update
 trustboundary update --force
 ```
 
-`--force` reinstalls the selected signed release even when that exact version is already installed. It may install a newer signed version but never downgrades; `--check` and `--force` cannot be combined. No unsigned or blind `git pull` fallback is used. Until the official signed release channel is published, release-channel configuration remains explicit.
+Normal users do **not** provide a manifest or public key. SRIC resolves only the fixed official `IsdarlinM/trustboundary` channel, requires the selected immutable release commit to be reported by GitHub as signature-verified, validates the exact source snapshot and package metadata, backs up state, installs without a shell, and verifies the installed distribution version.
+
+`--force` reinstalls the official release even when that exact version is already installed. It may install a newer official release but never downgrades; `--check` and `--force` cannot be combined. Normal upgrades require rollback metadata; same-version forced reinstalls use the verified target snapshot as the recovery package.
+
+`--manifest` and `--public-key` remain available together only as an advanced custom/private-channel override. Custom channels retain Ed25519 manifest and SHA-256 wheel verification. No blind `git pull` fallback is used. See `docs/release/update.md`.
 
 ## Validation gates
 
