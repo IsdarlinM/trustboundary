@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "product": "trustboundary",
+  "repository": "IsdarlinM/trustboundary",
+  "version": "0.5.5",
+  "commit": "993641593a6b934b860ee218aa5b1bc06c05ca4c",
+  "rollback_version": "0.5.4",
+  "rollback_commit": "1cbf743d116f86fe430f6316854d18ac886d3673"
+}
