@@ -26,26 +26,25 @@ def test_stale_core_and_missing_workbench_are_detected(monkeypatch: pytest.Monke
     assert "sric.web_workbench" in result.missing_modules
 
 
-def test_bridge_then_normal_update_and_same_version_force(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_bridge_chain_then_same_version_force_repair(monkeypatch: pytest.MonkeyPatch) -> None:
     updates: list[dict[str, object]] = []
     fake = SimpleNamespace(perform_product_update=lambda **kwargs: updates.append(kwargs))
     states = iter([_runtime("0.5.5", compatible=False), _runtime("0.5.7", compatible=True)])
-    bridged: list[bool] = []
+    bridges: list[str] = []
     monkeypatch.setattr(bootstrap, "status", lambda: next(states))
-    monkeypatch.setattr(bootstrap, "_upgrade_055_to_056", lambda: bridged.append(True))
+    monkeypatch.setattr(bootstrap, "_upgrade_055_to_056", lambda: bridges.append("055-056"))
+    monkeypatch.setattr(bootstrap, "_upgrade_056_to_057", lambda: bridges.append("056-057"))
     monkeypatch.setattr(bootstrap, "_updater", lambda: fake)
     monkeypatch.setattr(bootstrap, "_require_updater_api", lambda *_args: None)
     monkeypatch.setattr(bootstrap.importlib, "invalidate_caches", lambda: None)
     bootstrap.ensure_for_official_update()
-    assert bridged == [True]
-    assert updates[0]["current_version"] == "0.5.6"
-    assert updates[0]["force"] is False
+    assert bridges == ["055-056", "056-057"]
+    assert updates == []
 
-    updates.clear()
     states = iter([_runtime("0.5.7", compatible=False, missing=("sric.web_workbench",)), _runtime("0.5.7", compatible=True)])
     monkeypatch.setattr(bootstrap, "status", lambda: next(states))
     bootstrap.ensure_for_official_update()
-    assert updates[0]["force"] is True
+    assert updates == [{"expected_product": "sric-core", "current_version": "0.5.7", "check_only": False, "force": True}]
 
 
 def test_degraded_workbench_is_503_not_global_failure() -> None:
@@ -56,7 +55,7 @@ def test_degraded_workbench_is_503_not_global_failure() -> None:
     assert client.get("/api/v1/workbench/coverage").json()["complete"] is False
 
 
-def test_every_trustboundary_command_and_param_is_web_represented_and_helpable() -> None:
+def test_every_trustboundary_command_and_param_is_web_represented_and_all_help_forms() -> None:
     cli = build_command_catalog("trustboundary.cli_all")
     web = build_feature_catalog("trustboundary.cli_all")
     assert feature_contract("trustboundary.cli_all")["complete"] is True
@@ -70,5 +69,7 @@ def test_every_trustboundary_command_and_param_is_web_represented_and_helpable()
         args = path.split()
         assert runner.invoke(app, [*args, "--help"]).exit_code == 0, path
         assert runner.invoke(app, [*args, "-h"]).exit_code == 0, path
-        assert normalize_help_argv(["trustboundary", *args, "help"])[-1] == "--help"
+        normalized = normalize_help_argv(["trustboundary", *args, "help"])
+        assert normalized[-1] == "--help", path
+        assert runner.invoke(app, normalized[1:]).exit_code == 0, path
         assert [p["name"] for p in command["params"]] == [p["name"] for p in web_by_path[path]["params"]]
