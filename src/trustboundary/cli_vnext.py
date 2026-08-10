@@ -37,7 +37,7 @@ def doctor_vnext(
     runtime = sric_runtime_status()
     checks = {
         "python": {"ok": sys.version_info >= (3, 11), "version": sys.version.split()[0]},
-        "sric": {"ok": runtime.compatible, "version": runtime.version, "required": ">=0.5.7,<0.6", "missing_modules": list(runtime.missing_modules), "reasons": list(runtime.reasons)},
+        "sric": {"ok": runtime.compatible, "version": runtime.version, "required": ">=0.5.11,<0.6", "missing_modules": list(runtime.missing_modules), "reasons": list(runtime.reasons)},
         "ai": {"ok": True, "mode": "disabled", "cloud_uploads": False},
         "plugins": {"ok": True, "count": len(plugins)},
         "privacy": {"ok": True, "telemetry": False},
