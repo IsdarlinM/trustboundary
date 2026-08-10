@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.11 - 2026-08-09
+- Fixed shared Web asset rendering under the native TrustBoundary CSP: `/console` and `/workbench` now explicitly allow same-origin CSS/JS while retaining restrictive object/base/frame policies.
+- Added a regression that checks the actual CSP on both shared Web pages and verifies `/console/styles.css` is reachable.
+- Preserved SRIC 0.5.11 JSON-safe catalogs, conservative evidence/provenance semantics, fixed-runner execution and installer hardening unchanged.
+
 ## 0.5.10 - 2026-08-09
 - Adopted signed SRIC Core 0.5.11 and its JSON-safe Web command catalog while preserving TrustBoundary evidence/provenance and conservative truth-state semantics.
 - Kept normal Linux/Termux/Windows installation atomic and idempotent with no `--force-reinstall`; forced reinstall remains explicit to repair/update workflows.
