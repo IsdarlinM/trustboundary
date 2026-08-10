@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.10 - 2026-08-09
+- Adopted signed SRIC Core 0.5.11 and its JSON-safe Web command catalog while preserving TrustBoundary evidence/provenance and conservative truth-state semantics.
+- Kept normal Linux/Termux/Windows installation atomic and idempotent with no `--force-reinstall`; forced reinstall remains explicit to repair/update workflows.
+- Installer-internal doctor/capability/help smokes now suppress banners with `SENTINEL_BANNER=never` and emit captured diagnostics only on failure.
+- Added exact SRIC pin/lock, quiet-installer and HTTP-200 Console/Workbench catalog regressions.
+
 ## 0.5.9 - 2026-08-09
 - Hardened repair installation so obsolete, incomplete or broken Python environments rebuild only `~/.trustboundary/venv`, preserving trust workspaces, configuration and evidence.
 - Termux now prefers a writable `$PREFIX/bin` already present in `PATH`, making `trustboundary` immediately reachable after installation.
