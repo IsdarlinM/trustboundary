@@ -1,7 +1,7 @@
 # TrustBoundary Mapper
 
 ```text
-TrustBoundary Mapper :: v0.5.9
+TrustBoundary Mapper :: v0.5.10
 Developer: IsdarlinM
 
 Map identity flows, trust transitions, assumptions, and evidence.
@@ -34,6 +34,7 @@ trustboundary capabilities
 - zero-config official update flow with same-version `update --force`, rollback and first-party runtime repair;
 - exact SRIC version/module diagnostics in `doctor` and `/api/v1/runtime-compatibility`;
 - full Web Feature Workbench with every public TrustBoundary CLI command and argument represented as structured responsive controls;
+- JSON-safe shared Web command catalog generation from SRIC 0.5.11;
 - lazy shared-Web loading and actionable degraded Workbench 503 behavior so a missing shared UI module does not crash every CLI command;
 - advanced Web Command Console with exact public CLI command-tree parity and real-time jobs;
 - professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
@@ -60,15 +61,17 @@ trustboundary doctor --json
 trustboundary capabilities
 ```
 
-The normal installer pins SRIC Core to an immutable GitHub commit and resolves that explicit first-party source **in the same pip transaction as TrustBoundary**. Because `sric-core` is intentionally not discovered from PyPI, the installer no longer runs a later product-only `--force-reinstall` that can trigger `ResolutionImpossible`. `SRIC_CORE_SOURCE=/path/to/sric-core` remains an explicit development/release-validation override.
+The normal installer pins SRIC Core to an immutable GitHub commit and resolves that explicit first-party source **in the same pip transaction as TrustBoundary**. Because `sric-core` is intentionally not discovered from PyPI, the installer does not run a later product-only reinstall that can trigger `ResolutionImpossible`. `SRIC_CORE_SOURCE=/path/to/sric-core` remains an explicit development/release-validation override.
 
-The repair path preserves workspaces and evidence. It validates host Python and any existing runtime interpreter; a stale, incomplete or broken environment rebuilds only `~/.trustboundary/venv`. It bootstraps `pip`, `setuptools` and `wheel`, force-reinstalls constrained TrustBoundary plus the explicit SRIC source, runs `pip check`, verifies `sric.web_console` and `sric.web_workbench`, checks the supported SRIC version range, and runs doctor/capability plus `--help`, `-h` and `help` smokes.
+The repair path preserves workspaces and evidence. It validates host Python and any existing runtime interpreter; a stale, incomplete or broken environment rebuilds only `~/.trustboundary/venv`. It bootstraps `pip`, `setuptools` and `wheel`, resolves constrained TrustBoundary plus the explicit SRIC source, runs `pip check`, verifies `sric.web_console`, `sric.web_workbench` and `sric.web_catalog`, requires SRIC `>=0.5.11,<0.6`, and runs doctor/capability plus `--help`, `-h` and `help` smokes.
+
+Installer-internal smokes use `SENTINEL_BANNER=never` and a temporary validation log. Successful installation does not repeat the TrustBoundary banner; captured diagnostics are printed if validation fails. Normal installation does not use `--force-reinstall`.
 
 On Termux, a writable `$PREFIX/bin` already present in `PATH` is preferred so `trustboundary` is immediately reachable. Standard Linux falls back to `~/.local/bin` and persists the canonical profile entry only when necessary. Windows uses SRIC's registry-backed `sric.install_path` helper instead of `setx`; any Python 3 interpreter satisfying `>=3.11` is accepted.
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `TrustBoundary Mapper :: v0.5.9`, `Developer: IsdarlinM`, then the trust/identity-flow purpose statement. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation.
+Interactive terminals display a compact subdued-green banner ordered as `TrustBoundary Mapper :: v0.5.10`, `Developer: IsdarlinM`, then the trust/identity-flow purpose statement. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation.
 
 The help contract covers `trustboundary --help`, `trustboundary -h`, `trustboundary help`, `trustboundary COMMAND --help`, `trustboundary COMMAND -h` and `trustboundary COMMAND help`.
 
@@ -87,7 +90,7 @@ trustboundary web demo
 
 The native dashboard remains a quick trust-graph view and exposes visible navigation to **All Features** (`/workbench`) and **Advanced Console** (`/console`). The Workbench is generated from `trustboundary.cli_all` and represents every public command and every ordered CLI parameter as structured responsive controls. `/api/v1/runtime-compatibility` exposes exact shared-runtime status.
 
-Shared Web modules are loaded lazily. A stale/corrupt SRIC therefore cannot make every TrustBoundary command fail merely because an optional shared UI module is missing; the native app remains reachable and the unavailable Workbench returns an actionable `RUNTIME_INCOMPATIBLE` 503.
+SRIC 0.5.11 normalizes command metadata to deterministic JSON-safe primitives before FastAPI serialization, preventing unusual CLI defaults/metadata from producing an opaque catalog HTTP 500. Shared Web modules are loaded lazily; a stale/corrupt SRIC therefore cannot make every TrustBoundary command fail merely because an optional UI module is missing.
 
 The Workbench is not an operating-system shell. Execution uses the fixed SRIC runner with `shell=False`, disabled stdin, CSRF protection, secret redaction, bounded/cancellable jobs and SSE output. Scope/Policy/Rate/Approval and evidence semantics remain authoritative; no Web action can turn an inference into `VALIDATED` exploitability without evidence.
 
@@ -110,7 +113,7 @@ python -m sric.standalone_gate --root .
 python scripts/release-gate.py
 ```
 
-The 0.5.9 installer regression verifies the unpublished-first-party resolver topology, immutable SRIC pin, runtime lock, venv-only repair, Termux `$PREFIX/bin`, safe Windows PATH handling, Python discovery and dependency/import/help smokes. Existing runtime/interface and unit/integration/E2E/security suites continue to cover trust graphs, assumptions, proxy chains, identity transformations/provenance, contradictions, direct-origin paths, headers, mTLS/SPIFFE, imports and conservative invariant semantics. Destructive operations are gate-tested rather than executed solely for coverage.
+The 0.5.10 installer regression verifies atomic first-party resolution, signed SRIC 0.5.11 pin/lock, venv-only repair, Termux `$PREFIX/bin`, safe Windows PATH handling, quiet installer smokes and dependency/import/help checks. Web regressions require Console/Workbench catalogs to return HTTP 200 with non-empty command/feature sets and complete CLI/Web coverage. Existing runtime/interface and unit/integration/E2E/security suites continue to cover trust graphs, assumptions, proxy chains, identity transformations/provenance, contradictions, direct-origin paths, headers, mTLS/SPIFFE, imports and conservative invariant semantics. Destructive operations are gate-tested rather than executed solely for coverage.
 
 Evidence is written below `build/release-evidence/`; PASS must correspond to the exact source commit.
 
