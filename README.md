@@ -1,7 +1,7 @@
 # TrustBoundary Mapper
 
 ```text
-TrustBoundary Mapper :: v0.5.10
+TrustBoundary Mapper :: v0.5.11
 Developer: IsdarlinM
 
 Map identity flows, trust transitions, assumptions, and evidence.
@@ -35,6 +35,7 @@ trustboundary capabilities
 - exact SRIC version/module diagnostics in `doctor` and `/api/v1/runtime-compatibility`;
 - full Web Feature Workbench with every public TrustBoundary CLI command and argument represented as structured responsive controls;
 - JSON-safe shared Web command catalog generation from SRIC 0.5.11;
+- shared-route CSP permitting same-origin Console/Workbench CSS/JS while retaining restrictive object/base/frame policies;
 - lazy shared-Web loading and actionable degraded Workbench 503 behavior so a missing shared UI module does not crash every CLI command;
 - advanced Web Command Console with exact public CLI command-tree parity and real-time jobs;
 - professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
@@ -71,7 +72,7 @@ On Termux, a writable `$PREFIX/bin` already present in `PATH` is preferred so `t
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `TrustBoundary Mapper :: v0.5.10`, `Developer: IsdarlinM`, then the trust/identity-flow purpose statement. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation.
+Interactive terminals display a compact subdued-green banner ordered as `TrustBoundary Mapper :: v0.5.11`, `Developer: IsdarlinM`, then the trust/identity-flow purpose statement. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation.
 
 The help contract covers `trustboundary --help`, `trustboundary -h`, `trustboundary help`, `trustboundary COMMAND --help`, `trustboundary COMMAND -h` and `trustboundary COMMAND help`.
 
@@ -91,6 +92,8 @@ trustboundary web demo
 The native dashboard remains a quick trust-graph view and exposes visible navigation to **All Features** (`/workbench`) and **Advanced Console** (`/console`). The Workbench is generated from `trustboundary.cli_all` and represents every public command and every ordered CLI parameter as structured responsive controls. `/api/v1/runtime-compatibility` exposes exact shared-runtime status.
 
 SRIC 0.5.11 normalizes command metadata to deterministic JSON-safe primitives before FastAPI serialization, preventing unusual CLI defaults/metadata from producing an opaque catalog HTTP 500. Shared Web modules are loaded lazily; a stale/corrupt SRIC therefore cannot make every TrustBoundary command fail merely because an optional UI module is missing.
+
+For `/console` and `/workbench`, TrustBoundary overrides the native dashboard CSP with a shared-route policy that explicitly allows `style-src 'self' 'unsafe-inline'` and `script-src 'self'`; this permits the same-origin SRIC stylesheet and script while preserving `object-src 'none'`, `base-uri 'none'` and `frame-ancestors 'none'`.
 
 The Workbench is not an operating-system shell. Execution uses the fixed SRIC runner with `shell=False`, disabled stdin, CSRF protection, secret redaction, bounded/cancellable jobs and SSE output. Scope/Policy/Rate/Approval and evidence semantics remain authoritative; no Web action can turn an inference into `VALIDATED` exploitability without evidence.
 
@@ -113,7 +116,7 @@ python -m sric.standalone_gate --root .
 python scripts/release-gate.py
 ```
 
-The 0.5.10 installer regression verifies atomic first-party resolution, signed SRIC 0.5.11 pin/lock, venv-only repair, Termux `$PREFIX/bin`, safe Windows PATH handling, quiet installer smokes and dependency/import/help checks. Web regressions require Console/Workbench catalogs to return HTTP 200 with non-empty command/feature sets and complete CLI/Web coverage. Existing runtime/interface and unit/integration/E2E/security suites continue to cover trust graphs, assumptions, proxy chains, identity transformations/provenance, contradictions, direct-origin paths, headers, mTLS/SPIFFE, imports and conservative invariant semantics. Destructive operations are gate-tested rather than executed solely for coverage.
+The 0.5.11 Web regression verifies that both shared Web pages return a CSP allowing same-origin styles/scripts and that `/console/styles.css` is reachable. The 0.5.10 installer/catalog regressions remain in force for atomic first-party resolution, signed SRIC 0.5.11 pin/lock, venv-only repair, Termux `$PREFIX/bin`, safe Windows PATH handling, quiet installer smokes, HTTP-200 Console/Workbench catalogs and complete CLI/Web coverage. Existing unit/integration/E2E/security suites continue to cover trust graphs, assumptions, proxy chains, identity transformations/provenance, contradictions, direct-origin paths, headers, mTLS/SPIFFE, imports and conservative invariant semantics.
 
 Evidence is written below `build/release-evidence/`; PASS must correspond to the exact source commit.
 
