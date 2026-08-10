@@ -10,6 +10,11 @@ from trustboundary.cli_all import app
 
 runner = CliRunner()
 
+ALLOWED_CONTROLS = {
+    "text", "path", "number", "flag", "tri-state", "count", "multi-text",
+    "multi-value", "select", "multi-select",
+}
+
 
 def test_every_public_cli_command_and_argument_is_represented_in_workbench() -> None:
     cli = {item["path"]: item for item in build_command_catalog("trustboundary.cli_all")}
@@ -22,6 +27,8 @@ def test_every_public_cli_command_and_argument_is_represented_in_workbench() -> 
         ]
         assert web[path]["classification"] == command["classification"]
         assert web[path]["approval_required"] == command["approval_required"]
+        for param in web[path]["params"]:
+            assert param["control"] in ALLOWED_CONTROLS
 
 
 def test_every_public_cli_command_help_exposes_options_and_required_arguments() -> None:
@@ -41,11 +48,24 @@ def test_every_public_cli_command_help_exposes_options_and_required_arguments() 
 
 def test_workbench_and_native_trust_features(tmp_path) -> None:
     client = TestClient(create_app(tmp_path))
-    assert client.get("/workbench").status_code == 200
+    dashboard = client.get("/")
+    assert dashboard.status_code == 200
+    assert "Security Console" in dashboard.text
+    assert "href='/workbench'" in dashboard.text
+    assert "Advanced Console" not in dashboard.text
+    assert "href='/console'" not in dashboard.text
+
+    workbench = client.get("/workbench")
+    assert workbench.status_code == 200
+    assert "No command syntax is required" in workbench.text
+    assert "Advanced argv" not in workbench.text
+    assert "Additional arguments" not in workbench.text
     payload = client.get("/api/v1/workbench/catalog").json()
+    assert payload["schema_version"] == 2
     assert payload["contract"]["complete"] is True
     assert payload["execution"]["shell"] is False
     assert payload["execution"]["arbitrary_executable"] is False
+    assert payload["execution"]["user_supplied_argv"] is False
     assert {item["path"] for item in payload["features"]} == {
         item["path"] for item in build_command_catalog("trustboundary.cli_all")
     }
