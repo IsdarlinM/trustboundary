@@ -1,7 +1,7 @@
 # TrustBoundary Mapper
 
 ```text
-TrustBoundary Mapper :: v0.5.12
+TrustBoundary Mapper :: v0.5.13
 Developer: IsdarlinM
 
 Map identity flows, trust transitions, assumptions, and evidence.
@@ -13,7 +13,7 @@ Evidence-native identity, trust-transition and trust-assumption modeling.
 
 ## Standalone by design
 
-TrustBoundary Mapper is independently installable and independently useful. It depends on **SRIC Core >=0.5.12,<0.6** for shared evidence, policy, workspaces, graph and Web/runtime primitives; ReproSec, AuthTwin, FossilScope and Exposure DNA are optional integrations, never startup requirements.
+TrustBoundary Mapper is independently installable and independently useful. It depends on **SRIC Core >=0.5.13,<0.6** for shared evidence, policy, workspaces, graph and Web/runtime primitives; ReproSec, AuthTwin, FossilScope and Exposure DNA are optional integrations, never startup requirements.
 
 ```bash
 trustboundary doctor --json
@@ -33,14 +33,15 @@ trustboundary capabilities
 - local API/Web UI, CLI and offline demo;
 - zero-config official update flow with same-version `update --force`, rollback and first-party runtime repair;
 - exact SRIC version/module diagnostics in `doctor` and `/api/v1/runtime-compatibility`;
-- full Web Feature Workbench with every public TrustBoundary CLI command and argument represented as structured responsive controls;
-- JSON-safe shared Web command catalog generation;
-- structured redacted HTTP 503 handling when command-catalog construction itself fails;
+- guided **Web Security Console** with every public TrustBoundary capability represented as operation cards and typed responsive controls;
+- checkboxes/tri-state selectors for flags, combo/select controls for closed choices, numeric/path controls, repeated-value controls and protected sensitive fields;
+- JSON-safe shared Web capability catalog generation with choice/bound/path metadata;
+- structured redacted HTTP 503 handling when capability-catalog construction itself fails;
 - bounded Web child termination/reaping and short-lived retired-job retention for active SSE/status readers;
 - shared operational exception containment and persisted Job Engine secret redaction;
-- shared-route CSP permitting same-origin Console/Workbench CSS/JS while retaining restrictive object/base/frame policies;
+- shared-route CSP permitting same-origin Security Console CSS/JS while retaining restrictive object/base/frame policies;
 - lazy shared-Web loading and actionable degraded Workbench 503 behavior so a missing shared UI module does not crash every CLI command;
-- advanced Web Command Console with exact public CLI command-tree parity and real-time jobs;
+- fixed-runner execution with exact CLI-tree parity and real-time jobs while keeping free-form command/argv entry out of the user interface;
 - professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
 
 ## Evidence semantics
@@ -65,9 +66,9 @@ trustboundary doctor --json
 trustboundary capabilities
 ```
 
-The normal installer pins SRIC Core to immutable signed main commit `4dd0ad417e55fc76fb67d582ec50234bffff2876` and resolves that explicit first-party source **in the same pip transaction as TrustBoundary**. Because `sric-core` is intentionally not discovered from PyPI, the installer does not run a later product-only reinstall that can trigger `ResolutionImpossible`. `SRIC_CORE_SOURCE=/path/to/sric-core` remains an explicit development/release-validation override.
+The normal installer pins SRIC Core to immutable GitHub-verified commit `bd90fe668e4a2a23c00a39f7d63df1c092b63c12` and resolves that explicit first-party source **in the same pip transaction as TrustBoundary**. Because `sric-core` is intentionally not discovered from PyPI, the installer does not run a later product-only reinstall that can trigger `ResolutionImpossible`. `SRIC_CORE_SOURCE=/path/to/sric-core` remains an explicit development/release-validation override.
 
-The repair path preserves workspaces and evidence. It validates host Python and any existing runtime interpreter; a stale, incomplete or broken environment rebuilds only `~/.trustboundary/venv`. It bootstraps `pip`, `setuptools` and `wheel`, resolves constrained TrustBoundary plus the explicit SRIC source, runs `pip check`, verifies `sric.web_console`, `sric.web_workbench`, `sric.web_catalog` and `sric.web_runtime`, requires SRIC `>=0.5.12,<0.6`, and runs doctor/capability plus `--help`, `-h` and `help` smokes.
+The repair path preserves workspaces and evidence. It validates host Python and any existing runtime interpreter; a stale, incomplete or broken environment rebuilds only `~/.trustboundary/venv`. It bootstraps `pip`, `setuptools` and `wheel`, resolves constrained TrustBoundary plus the explicit SRIC source, runs `pip check`, verifies `sric.web_console`, `sric.web_workbench`, `sric.web_catalog` and `sric.web_runtime`, requires SRIC `>=0.5.13,<0.6`, and runs doctor/capability plus `--help`, `-h` and `help` smokes.
 
 Installer-internal smokes use `SENTINEL_BANNER=never` and a temporary validation log. Successful installation does not repeat the TrustBoundary banner; captured diagnostics are printed if validation fails. Normal installation does not use `--force-reinstall`.
 
@@ -75,7 +76,7 @@ On Termux, a writable `$PREFIX/bin` already present in `PATH` is preferred so `t
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `TrustBoundary Mapper :: v0.5.12`, `Developer: IsdarlinM`, then the trust/identity-flow purpose statement. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation.
+Interactive terminals display a compact subdued-green banner ordered as `TrustBoundary Mapper :: v0.5.13`, `Developer: IsdarlinM`, then the trust/identity-flow purpose statement. Use `trustboundary --no-color COMMAND`, `trustboundary COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation.
 
 The help contract covers `trustboundary --help`, `trustboundary -h`, `trustboundary help`, `trustboundary COMMAND --help`, `trustboundary COMMAND -h` and `trustboundary COMMAND help`.
 
@@ -94,13 +95,13 @@ trustboundary web demo
 
 ## Web and API
 
-The native dashboard remains a quick trust-graph view and exposes visible navigation to **All Features** (`/workbench`) and **Advanced Console** (`/console`). The Workbench is generated from `trustboundary.cli_all` and represents every public command and every ordered CLI parameter as structured responsive controls. `/api/v1/runtime-compatibility` exposes exact shared-runtime status.
+The native dashboard remains a quick trust-graph view. `/workbench` is the primary **Security Console** and is generated from `trustboundary.cli_all`, representing every public capability and ordered CLI parameter through structured responsive controls. `/console` is retained only as a compatibility alias that opens `/workbench`; it is not an argv-oriented user interface. `/api/v1/runtime-compatibility` exposes exact shared-runtime status.
 
-SRIC 0.5.12 normalizes command metadata to deterministic JSON-safe primitives before FastAPI serialization. If catalog construction itself fails unexpectedly, the API returns a bounded/redacted HTTP 503 instead of an opaque HTTP 500. Shared Web modules are loaded lazily; a stale/corrupt SRIC therefore cannot make every TrustBoundary command fail merely because an optional UI module is missing.
+SRIC 0.5.13 normalizes command metadata to deterministic JSON-safe primitives and includes choice, bound and path semantics so the browser can render appropriate HTML controls without duplicating product behavior. If catalog construction itself fails unexpectedly, the API returns a bounded/redacted HTTP 503 instead of an opaque HTTP 500. Shared Web modules are loaded lazily; a stale/corrupt SRIC therefore cannot make every TrustBoundary command fail merely because an optional UI module is missing.
 
-For `/console` and `/workbench`, TrustBoundary uses a same-origin CSP policy that permits the required shared stylesheet/script while retaining `object-src 'none'`, `base-uri 'none'` and `frame-ancestors 'none'`.
+For the Security Console, TrustBoundary uses a same-origin CSP policy that permits the required shared stylesheet/script while retaining `object-src 'none'`, `base-uri 'none'` and `frame-ancestors 'none'`.
 
-The Workbench is not an operating-system shell. Execution uses the fixed SRIC runner with `shell=False`, disabled stdin, CSRF protection, secret redaction, bounded/cancellable jobs and SSE output. Timed-out children use bounded terminate/kill/wait handling with background reaping when required. Recently pruned terminal jobs remain briefly available to active status/SSE readers. Scope/Policy/Rate/Approval and evidence semantics remain authoritative; no Web action can turn an inference into `VALIDATED` exploitability without evidence.
+Users do not type CLI command paths, option names, flags or free-form argv. Structured control values are serialized only as an internal transport detail to the fixed SRIC runner. Execution uses `shell=False`, disabled stdin, CSRF protection, secret redaction, bounded/cancellable jobs and SSE output. Timed-out children use bounded terminate/kill/wait handling with background reaping when required. Recently pruned terminal jobs remain briefly available to active status/SSE readers. Scope/Policy/Rate/Approval and evidence semantics remain authoritative; no Web action can turn an inference into `VALIDATED` exploitability without evidence.
 
 ## Updates
 
@@ -110,9 +111,9 @@ trustboundary update
 trustboundary update --force
 ```
 
-Supported stale SRIC runtimes are advanced through fixed immutable GitHub-signature-verified snapshots one release at a time from 0.5.5 through the 0.5.12 floor. This avoids unsafe rollback-metadata jumps. A same-version corrupt 0.5.12 runtime is repaired from the fixed signed 0.5.12 snapshot. Custom/private `--manifest` plus `--public-key` updates remain explicit and do not silently switch the core channel. No blind `git pull` fallback is used.
+Supported stale SRIC runtimes are advanced through fixed immutable GitHub-signature-verified snapshots one release at a time from 0.5.5 through the 0.5.13 floor. This avoids unsafe rollback-metadata jumps. A same-version corrupt 0.5.13 runtime is repaired from the fixed verified 0.5.13 snapshot. Custom/private `--manifest` plus `--public-key` updates remain explicit and do not silently switch the core channel. No blind `git pull` fallback is used.
 
-The SRIC official update channel may remain on the previous fully gated release while 0.5.12 exact-commit gates are blocked; TrustBoundary's first-party pin/repair chain uses fixed verified commits independently of that moving channel.
+The TrustBoundary 0.5.13 official channel points to a GitHub-verified release commit and carries rollback metadata for the immediately preceding verified 0.5.12 snapshot.
 
 ## Validation gates
 
@@ -121,9 +122,9 @@ python -m sric.standalone_gate --root .
 python scripts/release-gate.py
 ```
 
-The 0.5.12 runtime regression walks every public TrustBoundary CLI command, all supported root/subcommand help forms and exact ordered CLI/Web parameter parity. Existing unit/integration/E2E/security suites cover trust graphs, assumptions, proxy chains, identity transformations/provenance, contradictions, direct-origin paths, headers, mTLS/SPIFFE, imports, Console/Workbench assets/catalogs/coverage and conservative invariant semantics.
+The 0.5.13 runtime regressions walk every public TrustBoundary CLI command, all supported root/subcommand help forms, exact ordered CLI/Web parameter parity, structured control types and absence of free-form argv UI. Existing unit/integration/E2E/security suites cover trust graphs, assumptions, proxy chains, identity transformations/provenance, contradictions, direct-origin paths, headers, mTLS/SPIFFE, imports, native dashboard routes and conservative invariant semantics.
 
-`TEST_EVIDENCE.md` is authoritative for what actually executed. The shared SRIC 0.5.12 focused runtime harness passed its four targeted regressions after first exposing and fixing a background-reaper return-code race. GitHub-hosted runners are currently blocked by an account billing lock, so zero-step workflows are not counted as PASS and do not prove TrustBoundary's complete exact-commit release gate.
+`TEST_EVIDENCE.md` is authoritative for what actually executed. GitHub-hosted runners are currently blocked by an account billing lock, so zero-step workflows are not counted as PASS and do not prove TrustBoundary's complete exact-commit release gate. The current execution environment also lacks GitHub network/DNS access, so no substitute clone-based local full-suite PASS is claimed.
 
 ## Uninstall
 
