@@ -6,14 +6,13 @@ from pathlib import Path
 
 import typer
 from sric.plugins import PluginRegistry
-from sric.models import Confidence
 
 from . import cli as base
-from .adapters import import_architecture
-from .advanced import TrustIntelligence
+from .adapters import ArchitectureProvider, normalize_architecture_export
 from .core import TrustBoundaryEngine
-from .layers import IntendedTrustRule, ObservedTrustEvent, compare_trust_layers
-from .provenance import IdentityAssertion, ProvenanceEdge, analyze_identity_provenance, trace_identity_provenance
+from .layers import TrustLayerObservation, compare_trust_layers
+from .models import Node, NodeType
+from .provenance import IdentityProvenanceStep, analyze_identity_provenance
 from .sric_bootstrap import status as sric_runtime_status
 
 app = base.app
@@ -26,6 +25,22 @@ def _read_json(path: Path) -> object:
         return json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         raise typer.BadParameter(f"cannot read valid JSON from {path}: {exc}") from exc
+
+
+def _read_list(path: Path, label: str) -> list[object]:
+    raw = _read_json(path)
+    if not isinstance(raw, list):
+        raise typer.BadParameter(f"{label} JSON input must be a list")
+    return raw
+
+
+def _component_node_type(component_type: str) -> NodeType:
+    lowered = component_type.casefold()
+    if "gateway" in lowered:
+        return NodeType.GATEWAY
+    if "proxy" in lowered or "listener" in lowered:
+        return NodeType.PROXY
+    return NodeType.SERVICE
 
 
 @app.command("doctor")
@@ -41,7 +56,7 @@ def doctor_vnext(
         "sric": {
             "ok": runtime.compatible,
             "version": runtime.version,
-            "required": ">=0.5.12,<0.6",
+            "required": ">=0.5.13,<0.6",
             "missing_modules": list(runtime.missing_modules),
             "reasons": list(runtime.reasons),
         },
@@ -53,7 +68,12 @@ def doctor_vnext(
     if json_output:
         typer.echo(json.dumps({"ok": ok, "checks": checks}, indent=2))
     else:
-        typer.echo("\n".join(f"[{'OK' if item['ok'] else 'FAIL'}] {name}: {item}" for name, item in checks.items()))
+        typer.echo(
+            "\n".join(
+                f"[{'OK' if item['ok'] else 'FAIL'}] {name}: {item}"
+                for name, item in checks.items()
+            )
+        )
     if not ok:
         raise typer.Exit(1)
 
@@ -62,24 +82,59 @@ def doctor_vnext(
 def import_platform(
     workspace: str,
     provider: str = typer.Option(..., "--provider"),
-    path: Path = typer.Option(..., "--path"),
+    path: Path = typer.Option(..., "--path", exists=True, dir_okay=False),
     source_id: str = typer.Option(..., "--source-id"),
     evidence: list[str] = typer.Option([], "--evidence"),
     root: Path = typer.Option(root_default(), "--root"),
 ) -> None:
-    """Import a bounded architecture export as untrusted data with explicit provenance."""
+    """Import a bounded architecture export as untrusted configured-state data."""
     raw = _read_json(path)
     if not isinstance(raw, dict):
         raise typer.BadParameter("architecture export JSON must be an object")
-    report = import_architecture(provider=provider, source_id=source_id, data=raw, evidence_ids=evidence)
+    try:
+        provider_enum = ArchitectureProvider(provider.upper())
+    except ValueError as exc:
+        allowed = ", ".join(item.value for item in ArchitectureProvider)
+        raise typer.BadParameter(f"provider must be one of: {allowed}") from exc
+
+    report = normalize_architecture_export(
+        provider=provider_enum,
+        source_id=source_id,
+        data=raw,
+        evidence_ids=evidence,
+    )
     engine = TrustBoundaryEngine(wp(workspace, root))
-    for asset in report.assets:
-        engine.add_asset(asset)
-    for edge in report.edges:
-        engine.add_edge(edge)
-    for assumption in report.assumptions:
-        engine.add_assumption(assumption)
-    typer.echo(report.model_dump_json(indent=2))
+    imported_nodes: list[str] = []
+    for component in report.components:
+        engine.add_node(
+            Node(
+                node_id=component.component_id,
+                name=component.source_path,
+                node_type=_component_node_type(component.component_type),
+                metadata={
+                    "provider": component.provider.value,
+                    "component_type": component.component_type,
+                    "listeners": component.listeners,
+                    "routes": component.routes,
+                    "upstreams": component.upstreams,
+                    "trusted_headers": component.trusted_headers,
+                    "identity_validators": component.identity_validators,
+                    "source_id": source_id,
+                    "configured_only": True,
+                    "evidence_ids": component.evidence_ids,
+                },
+            )
+        )
+        imported_nodes.append(component.component_id)
+
+    payload = report.model_dump(mode="json")
+    payload["imported_node_ids"] = imported_nodes
+    payload["runtime_edges_created"] = 0
+    payload["note"] = (
+        "Configured routes/upstreams are retained as metadata; runtime trust edges "
+        "require explicit evidence and are not invented by the importer."
+    )
+    typer.echo(json.dumps(payload, indent=2, default=str))
     if report.errors:
         raise typer.Exit(2)
 
@@ -89,60 +144,92 @@ def layer_compare(
     intended_path: Path,
     observed_path: Path,
 ) -> None:
-    """Compare intended/configured and observed trust behavior without validating findings."""
-    intended_raw = _read_json(intended_path)
-    observed_raw = _read_json(observed_path)
-    if not isinstance(intended_raw, list) or not isinstance(observed_raw, list):
-        raise typer.BadParameter("intended and observed JSON inputs must both be lists")
-    intended = [IntendedTrustRule.model_validate(item) for item in intended_raw]
-    observed = [ObservedTrustEvent.model_validate(item) for item in observed_raw]
-    result = compare_trust_layers(intended, observed)
-    typer.echo(json.dumps([item.model_dump(mode="json") for item in result], indent=2, default=str))
+    """Compare declared/configured/observed trust samples without validating exploitability."""
+    intended_raw = _read_list(intended_path, "intended/configured")
+    observed_raw = _read_list(observed_path, "observed")
+    observations = [
+        TrustLayerObservation.model_validate(item)
+        for item in [*intended_raw, *observed_raw]
+    ]
+    result = compare_trust_layers(observations)
+    typer.echo(
+        json.dumps(
+            [item.model_dump(mode="json") for item in result],
+            indent=2,
+            default=str,
+        )
+    )
 
 
 @app.command("identity-trace")
 def identity_trace(
     assertions_path: Path,
     edges_path: Path,
-    assertion_id: str = typer.Option(..., "--assertion-id"),
+    assertion_id: str = typer.Option(
+        ...,
+        "--assertion-id",
+        help="Identity artifact ID to trace. The option name is retained for CLI compatibility.",
+    ),
     max_depth: int = typer.Option(12, "--max-depth", min=1, max=64),
 ) -> None:
-    """Trace identity provenance through bounded evidence-bearing edges."""
-    assertions_raw = _read_json(assertions_path)
-    edges_raw = _read_json(edges_path)
-    if not isinstance(assertions_raw, list) or not isinstance(edges_raw, list):
-        raise typer.BadParameter("assertions and edges JSON inputs must both be lists")
-    assertions = [IdentityAssertion.model_validate(item) for item in assertions_raw]
-    edges = [ProvenanceEdge.model_validate(item) for item in edges_raw]
-    result = trace_identity_provenance(assertions, edges, assertion_id, max_depth=max_depth)
-    typer.echo(result.model_dump_json(indent=2))
+    """Trace a bounded identity artifact through canonical provenance steps."""
+    steps_raw = [
+        *_read_list(assertions_path, "identity provenance"),
+        *_read_list(edges_path, "identity provenance"),
+    ]
+    steps = [IdentityProvenanceStep.model_validate(item) for item in steps_raw]
+    selected = sorted(
+        (item for item in steps if item.artifact_id == assertion_id),
+        key=lambda item: (item.sequence_index, item.step_id),
+    )[:max_depth]
+    if not selected:
+        typer.echo(f"identity artifact not found: {assertion_id}", err=True)
+        raise typer.Exit(2)
+    reports = analyze_identity_provenance(selected)
+    typer.echo(reports[0].model_dump_json(indent=2))
 
 
 @app.command("identity-analyze")
 def identity_analyze(assertions_path: Path, edges_path: Path) -> None:
-    """Analyze identity provenance conservatively; absence of evidence remains UNKNOWN."""
-    assertions_raw = _read_json(assertions_path)
-    edges_raw = _read_json(edges_path)
-    if not isinstance(assertions_raw, list) or not isinstance(edges_raw, list):
-        raise typer.BadParameter("assertions and edges JSON inputs must both be lists")
-    assertions = [IdentityAssertion.model_validate(item) for item in assertions_raw]
-    edges = [ProvenanceEdge.model_validate(item) for item in edges_raw]
-    result = analyze_identity_provenance(assertions, edges)
-    typer.echo(json.dumps([item.model_dump(mode="json") for item in result], indent=2, default=str))
+    """Analyze canonical identity provenance; incomplete evidence remains UNKNOWN."""
+    steps_raw = [
+        *_read_list(assertions_path, "identity provenance"),
+        *_read_list(edges_path, "identity provenance"),
+    ]
+    steps = [IdentityProvenanceStep.model_validate(item) for item in steps_raw]
+    result = analyze_identity_provenance(steps)
+    typer.echo(
+        json.dumps(
+            [item.model_dump(mode="json") for item in result],
+            indent=2,
+            default=str,
+        )
+    )
 
 
 @app.command("routes")
-def routes_command(workspace: str, root: Path = typer.Option(root_default(), "--root")) -> None:
-    """List modeled trust routes and evidence-aware summaries."""
-    intelligence = TrustIntelligence(TrustBoundaryEngine(wp(workspace, root)))
-    typer.echo(json.dumps(intelligence.routes(), indent=2, default=str))
+def routes_command(
+    workspace: str,
+    root: Path = typer.Option(root_default(), "--root"),
+) -> None:
+    """List modeled proxy/gateway trust routes from explicit transitions."""
+    engine = TrustBoundaryEngine(wp(workspace, root))
+    typer.echo(json.dumps(engine.proxy_chains(), indent=2, default=str))
 
 
 @app.command("jwt-paths")
-def jwt_paths(workspace: str, root: Path = typer.Option(root_default(), "--root")) -> None:
-    """List JWT/token trust paths without assuming exploitation."""
-    intelligence = TrustIntelligence(TrustBoundaryEngine(wp(workspace, root)))
-    typer.echo(json.dumps(intelligence.jwt_paths(), indent=2, default=str))
+def jwt_paths(
+    workspace: str,
+    root: Path = typer.Option(root_default(), "--root"),
+) -> None:
+    """List JWT/token identity flows without assuming exploitation."""
+    engine = TrustBoundaryEngine(wp(workspace, root))
+    items = [
+        item
+        for item in engine.identity_flows()
+        if str(item.get("data_type", "")).casefold() in {"jwt", "token"}
+    ]
+    typer.echo(json.dumps(items, indent=2, default=str))
 
 
 @app.command("proxy-diff")
@@ -151,21 +238,48 @@ def proxy_diff(
     route_id: str,
     root: Path = typer.Option(root_default(), "--root"),
 ) -> None:
-    """Compare proxy/gateway transformations for a modeled route."""
-    intelligence = TrustIntelligence(TrustBoundaryEngine(wp(workspace, root)))
-    try:
-        result = intelligence.proxy_diff(route_id)
-    except KeyError as exc:
+    """Explain one modeled transition without claiming an exploitable proxy inconsistency."""
+    engine = TrustBoundaryEngine(wp(workspace, root))
+    matches = [
+        item
+        for item in engine.store.load()["transitions"]
+        if item.get("transition_id") == route_id
+    ]
+    if not matches:
         typer.echo(f"route not found: {route_id}", err=True)
-        raise typer.Exit(2) from exc
-    typer.echo(json.dumps(result, indent=2, default=str))
+        raise typer.Exit(2)
+    item = matches[0]
+    typer.echo(
+        json.dumps(
+            {
+                "route_id": route_id,
+                "transition": item,
+                "status": "OBSERVED" if item.get("evidence_ids") else "INFERRED",
+                "counter_evidence": [
+                    "Unmodeled intermediaries may change the effective trust path."
+                ],
+                "validated_exploitability": False,
+            },
+            indent=2,
+            default=str,
+        )
+    )
 
 
 @app.command("confusion")
-def confusion_command(workspace: str, root: Path = typer.Option(root_default(), "--root")) -> None:
-    """List trust-confusion hypotheses with evidence/counter-evidence/confidence."""
-    intelligence = TrustIntelligence(TrustBoundaryEngine(wp(workspace, root)))
-    typer.echo(json.dumps([item.model_dump(mode="json") for item in intelligence.confusion_hypotheses()], indent=2, default=str))
+def confusion_command(
+    workspace: str,
+    root: Path = typer.Option(root_default(), "--root"),
+) -> None:
+    """List trust-confusion hypotheses with evidence and counter-evidence."""
+    items = TrustBoundaryEngine(wp(workspace, root)).infer()
+    typer.echo(
+        json.dumps(
+            [item.model_dump(mode="json") for item in items],
+            indent=2,
+            default=str,
+        )
+    )
 
 
 @app.command("path-search")
@@ -177,20 +291,32 @@ def path_search(
     root: Path = typer.Option(root_default(), "--root"),
 ) -> None:
     """Find bounded trust paths between modeled nodes."""
-    intelligence = TrustIntelligence(TrustBoundaryEngine(wp(workspace, root)))
-    typer.echo(json.dumps(intelligence.path_search(source, target, max_depth=max_depth), indent=2, default=str))
+    paths = TrustBoundaryEngine(wp(workspace, root)).paths(source, target)
+    bounded = [path for path in paths if len(path) - 1 <= max_depth]
+    typer.echo(json.dumps(bounded, indent=2, default=str))
 
 
 @app.command("assumption-review")
 def assumption_review(
     workspace: str,
-    minimum_confidence: float = typer.Option(0.0, "--minimum-confidence", min=0.0, max=1.0),
+    minimum_confidence: float = typer.Option(
+        0.0,
+        "--minimum-confidence",
+        min=0.0,
+        max=1.0,
+    ),
     root: Path = typer.Option(root_default(), "--root"),
 ) -> None:
-    """Review trust assumptions with explainable confidence and evidence."""
-    intelligence = TrustIntelligence(TrustBoundaryEngine(wp(workspace, root)))
-    results = intelligence.assumption_review(Confidence(value=minimum_confidence))
-    typer.echo(json.dumps([item.model_dump(mode="json") for item in results], indent=2, default=str))
+    """Review inferred trust assumptions conservatively."""
+    items = TrustBoundaryEngine(wp(workspace, root)).infer()
+    selected = [item for item in items if item.confidence >= minimum_confidence]
+    typer.echo(
+        json.dumps(
+            [item.model_dump(mode="json") for item in selected],
+            indent=2,
+            default=str,
+        )
+    )
 
 
 def run() -> None:
