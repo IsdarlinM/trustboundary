@@ -2,8 +2,8 @@
   "schema_version": 1,
   "product": "trustboundary",
   "repository": "IsdarlinM/trustboundary",
-  "version": "0.5.8",
-  "commit": "6e7ea9fe32a7ebbeb86c222cfce9cbbefd248bfc",
-  "rollback_version": "0.5.7",
-  "rollback_commit": "a6ed1f0d8eed02ba231cd5383d82808ecac6c418"
+  "version": "0.5.10",
+  "commit": "86cba95511636713372eeef2ce5fa4a37ab46d59",
+  "rollback_version": "0.5.8",
+  "rollback_commit": "6e7ea9fe32a7ebbeb86c222cfce9cbbefd248bfc"
 }
