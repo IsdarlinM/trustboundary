@@ -15,4 +15,4 @@ __all__ = [
     "analyze_websocket_trust_paths", "compare_trust_layers", "evaluate_trust_invariant",
     "normalize_architecture_export",
 ]
-__version__ = "0.5.11"
+__version__ = "0.5.12"
