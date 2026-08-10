@@ -1,48 +1,18 @@
-"""TrustBoundary Mapper package."""
+"""TrustBoundary Mapper."""
 
-from .layers import (
-    IntendedTrustRule,
-    ObservedTrustEvent,
-    TrustEvidenceKind,
-    TrustEvidenceLayer,
-    TrustMismatch,
-    TrustMismatchKind,
-    TrustMismatchStatus,
-    TrustPlane,
-    compare_trust_layers,
-)
-from .provenance import (
-    IdentityAssertion,
-    IdentitySource,
-    IdentityTrustState,
-    ProvenanceEdge,
-    ProvenanceEdgeKind,
-    ProvenanceFinding,
-    ProvenanceStatus,
-    TraceSemantics,
-    analyze_identity_provenance,
-    trace_identity_provenance,
-)
+from .adapters import ArchitectureImportReport, ArchitectureProvider, ImportedComponent, normalize_architecture_export
+from .invariants import TrustInvariant, TrustInvariantKind, TrustInvariantResult, evaluate_trust_invariant
+from .layers import ArchitectureLayer, HeaderAnalysis, TrustDrift, TrustLayerComparison, TrustLayerObservation, analyze_forwarding_headers, compare_trust_layers
+from .provenance import IdentityArtifactType, IdentityProvenanceReport, IdentityProvenanceStep, ProvenanceStepType, analyze_identity_provenance
+from .websocket import WebSocketTrustObservation, WebSocketTrustPath, WebSocketTrustStage, analyze_websocket_trust_paths
 
 __all__ = [
-    "IdentityAssertion",
-    "IdentitySource",
-    "IdentityTrustState",
-    "IntendedTrustRule",
-    "ObservedTrustEvent",
-    "ProvenanceEdge",
-    "ProvenanceEdgeKind",
-    "ProvenanceFinding",
-    "ProvenanceStatus",
-    "TraceSemantics",
-    "TrustEvidenceKind",
-    "TrustEvidenceLayer",
-    "TrustMismatch",
-    "TrustMismatchKind",
-    "TrustMismatchStatus",
-    "TrustPlane",
-    "analyze_identity_provenance",
-    "compare_trust_layers",
-    "trace_identity_provenance",
+    "ArchitectureImportReport", "ArchitectureLayer", "ArchitectureProvider", "HeaderAnalysis",
+    "IdentityArtifactType", "IdentityProvenanceReport", "IdentityProvenanceStep", "ImportedComponent",
+    "ProvenanceStepType", "TrustDrift", "TrustInvariant", "TrustInvariantKind", "TrustInvariantResult",
+    "TrustLayerComparison", "TrustLayerObservation", "WebSocketTrustObservation", "WebSocketTrustPath",
+    "WebSocketTrustStage", "analyze_forwarding_headers", "analyze_identity_provenance",
+    "analyze_websocket_trust_paths", "compare_trust_layers", "evaluate_trust_invariant",
+    "normalize_architecture_export",
 ]
 __version__ = "0.5.12"
