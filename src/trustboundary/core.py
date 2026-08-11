@@ -1,8 +1,7 @@
 from __future__ import annotations
-from collections import defaultdict, deque
 from pathlib import Path
 from typing import Any
-from .models import AssumptionCandidate, Node, NodeType, Transition, TrustAssertion
+from .models import Node, Transition, TrustAssertion
 from .store import JsonStore
 from sric.graph import GraphEdge, GraphNode, TemporalGraph
 from sric.jobs import JobEngine
@@ -29,8 +28,8 @@ def _upsert(items: list[dict[str, Any]], key: str, value: dict[str, Any]) -> Non
     items.append(value)
 
 
-from .core_imports import ImportMixin
-from .core_analysis import AnalysisMixin
+from .core_imports import ImportMixin  # noqa: E402
+from .core_analysis import AnalysisMixin  # noqa: E402
 
 class TrustBoundaryEngine(ImportMixin, AnalysisMixin):
     def __init__(self, workspace: Path) -> None:

@@ -12,6 +12,9 @@ from sric.lineage import EvidenceLineage, LineageRecord
 MAX_IMPORT_BYTES = 10 * 1024 * 1024
 
 class AnalysisMixin:
+    store: JsonStore
+    lineage: EvidenceLineage
+
     def graph(self) -> dict[str, Any]:
         return self.store.load()
 
@@ -130,7 +133,8 @@ class AnalysisMixin:
             return [t.model_dump(mode="json") for t in transitions if (t.source_node_id,t.target_node_id) in pairs]
         a = transitions_for(paths_a)
         b = transitions_for(paths_b)
-        sig=lambda xs:{(x["data_type"],x.get("input_name"),x.get("output_name"),x.get("verified")) for x in xs}
+        def sig(xs: list[dict[str, Any]]) -> set[tuple[Any, Any, Any, Any]]:
+            return {(x["data_type"], x.get("input_name"), x.get("output_name"), x.get("verified")) for x in xs}
         return {"source_a":source_a,"source_b":source_b,"target":target,"paths_a":paths_a,"paths_b":paths_b,"only_a":[list(x) for x in sorted(sig(a)-sig(b), key=str)],"only_b":[list(x) for x in sorted(sig(b)-sig(a), key=str)],"status":"HYPOTHESIS" if sig(a)!=sig(b) else "OBSERVED_EQUIVALENCE","note":"Differences describe observed/modelled trust transformations, not exploitability."}
 
     def jwt_metadata(self, claims: dict[str, Any]) -> dict[str, Any]:

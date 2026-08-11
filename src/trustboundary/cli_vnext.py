@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 import typer
 from sric.plugins import PluginRegistry
@@ -51,12 +52,12 @@ def doctor_vnext(
     """Check Python, exact SRIC feature compatibility, plugins and privacy."""
     plugins = PluginRegistry(plugin_path).list()
     runtime = sric_runtime_status()
-    checks = {
+    checks: dict[str, dict[str, Any]] = {
         "python": {"ok": sys.version_info >= (3, 11), "version": sys.version.split()[0]},
         "sric": {
             "ok": runtime.compatible,
             "version": runtime.version,
-            "required": ">=0.5.14,<0.6",
+            "required": ">=0.5.16,<0.6",
             "missing_modules": list(runtime.missing_modules),
             "reasons": list(runtime.reasons),
         },

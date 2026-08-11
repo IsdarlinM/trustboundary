@@ -11,6 +11,7 @@ from sric.graph import TemporalGraph
 from sric.jobs import JobEngine
 from sric.lineage import EvidenceLineage
 from sric.notebook import ResearchNotebook
+from sric.workspace import Workspace
 
 from . import __version__
 from .advanced import TrustIntelligence
@@ -22,6 +23,7 @@ JS = """async function load(){const g=await fetch('/api/graph').then(r=>r.json()
 
 
 def create_app(workspace: Path) -> FastAPI:
+    workspace = Workspace.initialize(workspace).root
     app = FastAPI(title="TrustBoundary Local API", version=__version__, redoc_url=None)
     engine = TrustBoundaryEngine(workspace)
     graph = TemporalGraph(workspace)

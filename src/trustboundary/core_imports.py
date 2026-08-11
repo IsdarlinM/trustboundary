@@ -2,6 +2,7 @@ from __future__ import annotations
 # ruff: noqa: F401
 from collections import defaultdict, deque
 from pathlib import Path
+from collections.abc import Callable
 from typing import Any
 from .models import AssumptionCandidate, Node, NodeType, Transition, TrustAssertion
 from .store import JsonStore
@@ -35,8 +36,19 @@ def _walk_scalars(obj: Any) -> list[str]:
     elif isinstance(obj, (str,int,float,bool)): out.append(str(obj))
     return out
 
+def _mapping(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+def _items(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
 class ImportMixin:
-    def import_platform_config(self, path: Path) -> dict[str, int]:
+    store: JsonStore
+    add_node: Callable[[Node], None]
+    add_transition: Callable[[Transition], None]
+    add_assertion: Callable[[TrustAssertion], None]
+
+    def import_platform_config(self, path: Path) -> dict[str, int | str]:
         """Import supplied Kubernetes/Istio/Envoy configuration without contacting a cluster."""
         import hashlib
         import json
@@ -82,25 +94,25 @@ class ImportMixin:
         for obj in objects:
             kind = str(obj.get("kind", ""))
             api_version = str(obj.get("apiVersion", ""))
-            metadata = obj.get("metadata") if isinstance(obj.get("metadata"), dict) else {}
+            metadata = _mapping(obj.get("metadata"))
             name = str(metadata.get("name", kind or "unnamed"))
-            spec = obj.get("spec") if isinstance(obj.get("spec"), dict) else {}
+            spec = _mapping(obj.get("spec"))
 
             if kind == "Ingress":
                 gateway_id = nid("ingress", name)
                 ensure(Node(node_id=gateway_id, name=name, node_type=NodeType.GATEWAY, public_reachable=True, metadata={"platform": "kubernetes", "kind": kind}))
-                rules = spec.get("rules") if isinstance(spec.get("rules"), list) else []
+                rules = _items(spec.get("rules"))
                 backends: set[str] = set()
-                default_backend = spec.get("defaultBackend") if isinstance(spec.get("defaultBackend"), dict) else None
+                default_backend = _mapping(spec.get("defaultBackend"))
                 if default_backend:
-                    svc = default_backend.get("service") if isinstance(default_backend.get("service"), dict) else {}
+                    svc = _mapping(default_backend.get("service"))
                     if svc.get("name"): backends.add(str(svc["name"]))
                 for rule in rules:
-                    http = rule.get("http") if isinstance(rule, dict) and isinstance(rule.get("http"), dict) else {}
-                    paths = http.get("paths") if isinstance(http.get("paths"), list) else []
+                    http = _mapping(_mapping(rule).get("http"))
+                    paths = _items(http.get("paths"))
                     for path_item in paths:
-                        backend = path_item.get("backend") if isinstance(path_item, dict) and isinstance(path_item.get("backend"), dict) else {}
-                        service = backend.get("service") if isinstance(backend.get("service"), dict) else {}
+                        backend = _mapping(_mapping(path_item).get("backend"))
+                        service = _mapping(backend.get("service"))
                         if service.get("name"): backends.add(str(service["name"]))
                 for svc_name in sorted(backends):
                     svc_id = nid("svc", svc_name)
@@ -119,11 +131,11 @@ class ImportMixin:
                 ensure(Node(node_id=vs_id, name=name, node_type=NodeType.GATEWAY, metadata={"platform": "istio", "kind": kind}))
                 destinations: set[str] = set()
                 for section in ("http", "tcp", "tls"):
-                    routes = spec.get(section) if isinstance(spec.get(section), list) else []
+                    routes = _items(spec.get(section))
                     for route_block in routes:
-                        route_items = route_block.get("route") if isinstance(route_block, dict) and isinstance(route_block.get("route"), list) else []
+                        route_items = _items(_mapping(route_block).get("route"))
                         for route in route_items:
-                            dest = route.get("destination") if isinstance(route, dict) and isinstance(route.get("destination"), dict) else {}
+                            dest = _mapping(_mapping(route).get("destination"))
                             if dest.get("host"): destinations.add(str(dest["host"]))
                 for host in sorted(destinations):
                     svc_id = nid("svc", host)
@@ -134,10 +146,10 @@ class ImportMixin:
             elif "static_resources" in obj:
                 envoy_id = nid("envoy", path.name)
                 ensure(Node(node_id=envoy_id, name=f"Envoy:{path.name}", node_type=NodeType.PROXY, metadata={"platform": "envoy"}))
-                static = obj.get("static_resources") if isinstance(obj.get("static_resources"), dict) else {}
-                clusters = static.get("clusters") if isinstance(static.get("clusters"), list) else []
+                static = _mapping(obj.get("static_resources"))
+                clusters = _items(static.get("clusters"))
                 for cluster in clusters:
-                    cluster_name = str(cluster.get("name", "unnamed")) if isinstance(cluster, dict) else "unnamed"
+                    cluster_name = str(_mapping(cluster).get("name", "unnamed"))
                     svc_id = nid("cluster", cluster_name)
                     ensure(Node(node_id=svc_id, name=cluster_name, node_type=NodeType.SERVICE, metadata={"platform": "envoy", "kind": "cluster"}))
                     self.add_transition(Transition(transition_id=nid("route", f"{envoy_id}:{svc_id}"), source_node_id=envoy_id, target_node_id=svc_id, data_type="network_path", verified=None, metadata={"source": "envoy_config"}))
@@ -182,7 +194,8 @@ class ImportMixin:
         hosts: set[str] = set()
         interesting = {"authorization", "x-forwarded-for", "x-real-ip", "x-user-id", "x-auth-user", "cf-connecting-ip", "forwarded", "via"}
         for entry in entries:
-            req = entry.get("request", {})
+            entry_data = _mapping(entry)
+            req = _mapping(entry_data.get("request"))
             url = str(req.get("url", ""))
             host = urlsplit(url).hostname
             if not host:
@@ -191,11 +204,11 @@ class ImportMixin:
             if host not in hosts:
                 self.add_node(Node(node_id=node_id, name=host, node_type=NodeType.SERVICE, public_reachable=True, metadata={"source": "HAR"}))
                 hosts.add(host)
-            for header in req.get("headers", []):
-                name = str(header.get("name", ""))
+            for header in _items(req.get("headers")):
+                name = str(_mapping(header).get("name", ""))
                 if name.lower() not in interesting and not name.lower().startswith("x-user-"):
                     continue
-                tid = "HAR-" + hashlib.sha256(f"{entry.get('startedDateTime')}:{host}:{name}".encode()).hexdigest()[:12]
+                tid = "HAR-" + hashlib.sha256(f"{entry_data.get('startedDateTime')}:{host}:{name}".encode()).hexdigest()[:12]
                 self.add_transition(Transition(transition_id=tid, source_node_id="client", target_node_id=node_id, data_type="header" if name.lower() != "authorization" else "token", input_name=name, verified=None, evidence_ids=[tid], metadata={"source": "HAR", "client_controlled_observation": True}))
                 transitions += 1
         return {"hosts": len(hosts), "transitions": transitions}

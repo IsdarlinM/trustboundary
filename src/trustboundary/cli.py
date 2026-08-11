@@ -5,19 +5,9 @@ from pathlib import Path
 from typing import Optional
 import typer
 from sric.workspace import Workspace
-from sric.evidence import EvidenceStore
-from sric.models import Provenance, ProvenanceType
 from sric.plugins import PluginRegistry
-from sric.scope import ScopeEngine, ScopePolicy
-from sric.updater import perform_update
-from sric.graph import TemporalGraph
-from sric.jobs import JobEngine
-from sric.lineage import EvidenceLineage
-from sric.notebook import NotebookEntry, ResearchNotebook
 from . import __version__
-from .api import create_app
 from .core import TrustBoundaryEngine
-from .models import Node, NodeType, Transition, TrustAssertion
 
 app = typer.Typer(
     name="trustboundary",
@@ -30,6 +20,12 @@ app = typer.Typer(
 
 def rd() -> Path:
     return Path.home() / ".trustboundary" / "workspaces"
+
+
+def root_default() -> Path:
+    """Return the workspace root shared by base and vNext commands."""
+
+    return rd()
 
 
 def wp(n: str, r: Path) -> Path:
@@ -166,6 +162,6 @@ def help_command(ctx: typer.Context, command: Optional[str] = typer.Argument(Non
 
 
 def run() -> None:
-    if len(sys.argv) >= 3 and sys.argv[-1] == "help" and sys.argv[1] != "help":
+    if len(sys.argv) >= 3 and sys.argv[-1] == "help":
         sys.argv[-1] = "--help"
     app()

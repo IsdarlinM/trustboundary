@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import typer
 from sric.cli_style import CLIBrand, configure_cli_context, no_color_option, run_branded_cli
+from pathlib import Path
 
 from . import __version__
 from . import cli as _base_cli
@@ -12,30 +13,43 @@ from . import cli_capabilities as _cli_capabilities  # noqa: F401
 from . import cli_update as _cli_update  # noqa: F401,E402
 
 
-def _create_complete_app(*args: object, **kwargs: object) -> object:
+def _create_complete_app(workspace: Path) -> object:
     from .api_all import create_app
 
-    return create_app(*args, **kwargs)
+    return create_app(workspace)
 
 
-_base_cli.create_app = _create_complete_app
+setattr(_base_cli, "create_app", _create_complete_app)
 
 __all__ = ["BRAND", "app", "normalize_help_argv", "run"]
 
 BRAND = CLIBrand(product="TrustBoundary Mapper", description="Map identity flows, trust transitions, assumptions, and evidence.", version=__version__)
-app.rich_markup_mode = "rich"
+app.rich_markup_mode = None
 
 
-@app.callback()
-def branded_main(ctx: typer.Context, no_color: bool = no_color_option()) -> None:
+@app.callback(invoke_without_command=True)
+def branded_main(
+    ctx: typer.Context,
+    no_color: bool = no_color_option(),
+    version: bool = typer.Option(
+        False,
+        "--version",
+        "-V",
+        is_eager=True,
+        help="Show the TrustBoundary version and exit.",
+    ),
+) -> None:
     """TrustBoundary CLI presentation controls."""
+    if version:
+        typer.echo(__version__)
+        raise typer.Exit()
     configure_cli_context(ctx, no_color=no_color)
 
 
 def normalize_help_argv(argv: list[str]) -> list[str]:
     """Normalize trailing `help` for root and nested TrustBoundary commands."""
     normalized = list(argv)
-    if len(normalized) >= 3 and normalized[-1] == "help" and normalized[1] != "help":
+    if len(normalized) >= 3 and normalized[-1] == "help":
         normalized[-1] = "--help"
     return normalized
 

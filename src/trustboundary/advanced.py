@@ -1,5 +1,6 @@
 from __future__ import annotations
-import hashlib,json
+import hashlib
+import json
 from pathlib import Path
 from typing import Any
 from .models import Node,NodeType,Transition,TrustAssertion
